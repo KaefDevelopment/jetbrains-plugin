@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>nautime.io</id>
+    <name>NAU</name>
+    <vendor email="alex@nautime.io" url="https://www.nautime.io">nautime.io</vendor>
+    <depends>com.intellij.modules.platform</depends>
+    <!--    <depends optional="true" config-file="git-extension.xml">Git4Idea</depends>-->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup
+                displayType="STICKY_BALLOON"
+                id="nautime.io"
+        />
+
+        <postStartupActivity implementation="io.nautime.jetbrains.extension.NauProjectActivity"/>
+
+        <applicationConfigurable
+                parentId="tools"
+                instance="io.nautime.jetbrains.AppSettingsConfigurable"
+                id="io.nautime.jetbrains.AppSettingsConfigurable"
+                displayName="Nau Time Tracker"/>
+
+        <typedHandler implementation="io.nautime.jetbrains.handlers.KeyHandler"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener class="io.nautime.jetbrains.listeners.NauDocumentListener"
+                  topic="com.intellij.openapi.editor.event.BulkAwareDocumentListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauFileManagerListener"
+                  topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauApplicationActivationListener"
+                  topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauFileEditorManagerListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauAppLifecycleListener"
+                  topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauAnActionListener"
+                  topic="com.intellij.openapi.actionSystem.ex.AnActionListener"/>
+        <listener class="io.nautime.jetbrains.listeners.NauFocusChangeListener"
+                  topic="com.intellij.openapi.editor.ex.FocusChangeListener"/>
+    </applicationListeners>
+</idea-plugin>

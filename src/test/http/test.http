@@ -1,0 +1,8 @@
+### Send POST request with json body
+POST http://46.36.219.38:8080/dashboard/v1/summary
+Content-Type: application/json
+
+{
+  "from": "2021-11-22",
+  "to": "2023-11-23"
+}

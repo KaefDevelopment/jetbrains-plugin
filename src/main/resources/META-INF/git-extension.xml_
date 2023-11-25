@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="io.nautime.jetbrains.listeners.KaefGitListener"/>
+    </extensions>
+</idea-plugin>

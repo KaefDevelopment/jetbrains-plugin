@@ -32,7 +32,7 @@
                                 id="NauStatusBar"
                                 order="last" />
 
-        <postStartupActivity implementation="io.nautime.jetbrains.extension.NauProjectActivity"/>
+<!--        <postStartupActivity implementation="io.nautime.jetbrains.extension.NauProjectActivity"/>-->
 
         <applicationConfigurable
                 parentId="tools"

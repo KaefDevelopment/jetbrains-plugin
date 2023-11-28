@@ -3,6 +3,7 @@ package io.nautime.jetbrains.statusbar
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.ListPopup
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.IconLoader.getIcon
 import com.intellij.openapi.wm.StatusBar
@@ -20,11 +21,15 @@ class NauStatusBar : StatusBarWidgetFactory {
 
     override fun getId(): String = WIDGET_ID
 
-    override fun getDisplayName(): String {
-        return "Nau"
-    }
+    override fun getDisplayName(): String = "Nau"
 
     override fun createWidget(project: Project): StatusBarWidget = NauStatusBarWidget(project)
+
+    override fun canBeEnabledOn(statusBar: StatusBar): Boolean = super.canBeEnabledOn(statusBar)
+
+    override fun disposeWidget(widget: StatusBarWidget) = super.disposeWidget(widget)
+
+    override fun isAvailable(project: Project): Boolean = super.isAvailable(project)
 
 //    override fun disposeWidget(widget: StatusBarWidget) {}
 
@@ -52,6 +57,10 @@ class NauStatusBar : StatusBarWidgetFactory {
                 if (widget.statusBar != null) widget.statusBar.updateWidget(WIDGET_ID)
                 return null
             }
+
+            override fun getPopupStep(): ListPopup? = super.getPopupStep()
+
+
 
             override fun getSelectedValue(): String = NauPlugin.getStatusBarText()
 

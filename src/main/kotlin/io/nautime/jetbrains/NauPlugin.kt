@@ -7,8 +7,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.wm.WindowManager
 import com.intellij.util.PlatformUtils
 import com.intellij.util.concurrency.AppExecutorUtil
 import io.nautime.jetbrains.model.EventDto
@@ -16,8 +18,10 @@ import io.nautime.jetbrains.model.EventParamsMap
 import io.nautime.jetbrains.model.EventType
 import io.nautime.jetbrains.model.PluginStatusResponse
 import io.nautime.jetbrains.model.SendEventsRequest
+import io.nautime.jetbrains.model.Stats
 import io.nautime.jetbrains.senders.CliExecutor
 import io.nautime.jetbrains.senders.HttpSender
+import io.nautime.jetbrains.statusbar.NauStatusBar
 import io.nautime.jetbrains.utils.FileDb
 import io.nautime.jetbrains.utils.IdeUtils
 import io.nautime.jetbrains.utils.getCurrentFile
@@ -255,7 +259,9 @@ class NauPlugin() : Disposable {
             val statusResponse = try {
                 val response = httpSender.getStatus(getPluginId())
                 pluginState.tryUpdateCliVersion(response.cliVersion)
+                stats = response.stats
                 pluginState.latestCheck = Instant.now()
+                updateStatusBar()
                 response
             } catch (ex: Exception) {
                 log.info("Error during get status request", ex)
@@ -340,6 +346,13 @@ class NauPlugin() : Disposable {
         }
     }
 
+    private fun updateStatusBar() {
+        ProjectManager.getInstance().openProjects.filter { !it.isDisposed }.map { project ->
+            val statusbar = WindowManager.getInstance().getStatusBar(project) ?: return
+            statusbar.updateWidget(NauStatusBar.WIDGET_ID)
+        }
+    }
+
 
     override fun dispose() {
         mainJobFuture.cancel(false)
@@ -353,6 +366,7 @@ class NauPlugin() : Disposable {
         private lateinit var pluginStateHolder: PluginStateHolder
         private lateinit var notificationService: NotificationService
         private lateinit var fileDb: FileDb
+        private var stats: Stats? = null
 
         private var initPlugin = false
 
@@ -362,11 +376,26 @@ class NauPlugin() : Disposable {
 
         fun getState(): PluginState = pluginState
 
+        fun getStats(): Stats? = stats
+
         fun getPluginId(): String = pluginState.pluginId
 
-        fun getPluginLink(): String = "https://nautime.io/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
+        fun getPluginLinkUrl(): String = "https://nautime.io/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
+
+        fun getDashboardUrl(): String = "https://nautime.io/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
 
         fun getNotificationService(): NotificationService = notificationService
 
+        fun getStatusBarText(): String {
+            if(!getState().isLinked) return "Nau"
+            if (stats == null) return "Nau"
+            val duration = Duration.ofSeconds(stats!!.total)
+            if (duration.toMinutes() == 0L) return "Nau"
+            val hours = duration.toHours()
+            val mins = duration.minusHours(hours).toMinutes()
+            if (hours == 0L) return "${mins}m"
+            if (mins == 0L) return "${hours}h"
+            return "${hours}h ${mins}m"
+        }
     }
 }

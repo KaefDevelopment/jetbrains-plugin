@@ -7,6 +7,8 @@ import io.nautime.jetbrains.Sender
 import io.nautime.jetbrains.ex.CliNotReadyEx
 import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.utils.OsHelper
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
@@ -58,6 +60,9 @@ class CliExecutor : Sender {
             val stdoutStr = stdout.lines().collect(Collectors.joining())
             if (stdoutStr.isNotBlank()) {
                 NauPlugin.log.warn("[Cli] Events sent out $stdoutStr")
+                val response: StatusResponse = Json.decodeFromString(stdoutStr)
+                if (response.status) NauPlugin.log.info("[Cli] Events sent")
+                return response.status
             }
 
             val stderrStr = stderr.lines().collect(Collectors.joining())
@@ -66,8 +71,8 @@ class CliExecutor : Sender {
                 return false
             }
 
-            NauPlugin.log.info("[Cli] Events sent")
-            return true
+            NauPlugin.log.info("[Cli] Events sent error. Empty stdout")
+            return false
         } catch (ex: Exception) {
             if (OsHelper.isWindows() && ex.toString().contains("Access is denied")) {
                 NauPlugin.getNotificationService().showWarningNotif(
@@ -132,4 +137,9 @@ class CliExecutor : Sender {
         }
     }
 
+    @Serializable
+    data class StatusResponse(
+        val status: Boolean,
+        val error: String,
+    )
 }

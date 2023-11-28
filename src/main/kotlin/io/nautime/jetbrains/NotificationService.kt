@@ -25,7 +25,7 @@ class NotificationService {
             .addAction(
                 object : BrowseNotificationAction(
                     "Link plugin",
-                    NauPlugin.getPluginLink()
+                    NauPlugin.getPluginLinkUrl()
                 ) {
                     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
                         super.actionPerformed(e, notification)
@@ -48,7 +48,7 @@ class NotificationService {
             .addAction(
                 BrowseNotificationAction(
                     "Browse your stats",
-                    NauPlugin.getPluginLink()
+                    NauPlugin.getDashboardUrl()
                 )
             )
 //            .setIcon(KeyPromoterIcons.KP_ICON)

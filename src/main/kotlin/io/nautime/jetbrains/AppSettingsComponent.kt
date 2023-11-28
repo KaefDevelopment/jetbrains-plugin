@@ -22,7 +22,7 @@ class AppSettingsComponent {
 
         if (pluginState.isLinked) {
             formBuilder.addLabeledComponent(
-                Label("Plugin is linked. You can explore your working activity on "),
+                Label("Plugin is linked. You can explore your working activity on"),
                 Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") })
 
             formBuilder.addComponent(
@@ -36,7 +36,7 @@ class AppSettingsComponent {
         } else {
             formBuilder.addComponent(
                 JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-                    add(Link("Follow link") { BrowserUtil.browse(NauPlugin.getPluginLink()) })
+                    add(Link("Follow link") { BrowserUtil.browse(NauPlugin.getPluginLinkUrl()) })
                     add(Label("to connect Nau plugin"))
                 }
             )
@@ -44,7 +44,7 @@ class AppSettingsComponent {
             formBuilder.addComponent(
                 JPanel(FlowLayout(FlowLayout.LEFT)).apply {
                     add(Label("Or copy plugin uuid and past it on"))
-                    add(Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard/plugin/link") })
+                    add(Link("Nau dashboard") { BrowserUtil.browse(NauPlugin.getDashboardUrl()) })
                 }
             )
 

@@ -6,19 +6,15 @@ import javax.swing.JComponent
 
 
 class AppSettingsConfigurable : Configurable {
-    private var settingsComponent: io.nautime.jetbrains.AppSettingsComponent? = null
+    private var settingsComponent: AppSettingsComponent? = null
 
     @Nls(capitalization = Nls.Capitalization.Title)
     override fun getDisplayName(): String {
         return "Nau Time"
     }
 
-//    override fun getPreferredFocusedComponent(): JComponent {
-//        return settingsComponent.getPreferredFocusedComponent()
-//    }
-
     override fun createComponent(): JComponent {
-        return io.nautime.jetbrains.AppSettingsComponent().also {
+        return AppSettingsComponent().also {
             settingsComponent = it
         }.panel
     }

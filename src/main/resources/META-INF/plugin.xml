@@ -1,6 +1,23 @@
 <idea-plugin>
     <id>nautime.io</id>
-    <name>NAU</name>
+    <name>Nau Time Tracker</name>
+    <description>
+        <![CDATA[
+      Modern automatic time tracker: Boost your productivity and gain better insights into how you spend your time. Featuring a modern web UI and a mobile application
+      <br/>
+      <br/>
+      <b>Install</b>
+      <br/>
+      <ul>
+        <li>Inside your IDE, select Settings > Plugins</li>
+        <li>Search for Nau Time Tracker</li>
+        <li>Install plugin</li>
+        <li>Click on the Nau icon in the status bar and register at <a href="https://nautime.io">nautime.io</a></li>
+        <li>Enjoy your coding stats</li>
+      </ul>
+      <br/>
+    ]]>
+    </description>
     <vendor email="alex@nautime.io" url="https://www.nautime.io">nautime.io</vendor>
     <depends>com.intellij.modules.platform</depends>
     <!--    <depends optional="true" config-file="git-extension.xml">Git4Idea</depends>-->
@@ -10,6 +27,10 @@
                 displayType="STICKY_BALLOON"
                 id="nautime.io"
         />
+
+        <statusBarWidgetFactory implementation="io.nautime.jetbrains.statusbar.NauStatusBar"
+                                id="NauStatusBar"
+                                order="last" />
 
         <postStartupActivity implementation="io.nautime.jetbrains.extension.NauProjectActivity"/>
 

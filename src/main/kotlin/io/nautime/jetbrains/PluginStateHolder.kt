@@ -7,7 +7,6 @@ import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Transient
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Service
@@ -35,7 +34,7 @@ data class PluginState(
     var isCliReady: Boolean = false,
     var needCliUpdate: Boolean = false,
     var currentCliVer: String = "",
-    var latestCliVer: String = "v0.0.1-rc6",
+    var latestCliVer: String = "v1.0.0",
     var latestCheckVal: Long = 0L,
 ) {
 
@@ -47,7 +46,8 @@ data class PluginState(
         get() = Instant.ofEpochSecond(latestCheckVal)
 
     fun timeToCheck(): Boolean {
-        return latestCheck.isBefore(Instant.now().minus(5, ChronoUnit.MINUTES))
+        return true
+//        return latestCheck.isBefore(Instant.now().minus(2, ChronoUnit.MINUTES))
     }
 
     fun tryUpdateCliVersion(newVersion: String) {

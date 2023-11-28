@@ -59,4 +59,12 @@
         <listener class="io.nautime.jetbrains.listeners.NauFocusChangeListener"
                   topic="com.intellij.openapi.editor.ex.FocusChangeListener"/>
     </applicationListeners>
+
+    <change-notes>
+        <![CDATA[
+        1.0.4
+        <br />
+        Compatibility fixes
+    ]]>
+    </change-notes>
 </idea-plugin>

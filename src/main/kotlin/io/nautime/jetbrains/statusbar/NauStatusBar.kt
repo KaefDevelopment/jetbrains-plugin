@@ -25,11 +25,11 @@ class NauStatusBar : StatusBarWidgetFactory {
 
     override fun createWidget(project: Project): StatusBarWidget = NauStatusBarWidget(project)
 
-    override fun canBeEnabledOn(statusBar: StatusBar): Boolean = super.canBeEnabledOn(statusBar)
+    override fun canBeEnabledOn(statusBar: StatusBar): Boolean = true
 
-    override fun disposeWidget(widget: StatusBarWidget) = super.disposeWidget(widget)
+    override fun disposeWidget(widget: StatusBarWidget) = Disposer.dispose(widget)
 
-    override fun isAvailable(project: Project): Boolean = super.isAvailable(project)
+    override fun isAvailable(project: Project): Boolean = true
 
 //    override fun disposeWidget(widget: StatusBarWidget) {}
 
@@ -58,9 +58,8 @@ class NauStatusBar : StatusBarWidgetFactory {
                 return null
             }
 
-            override fun getPopupStep(): ListPopup? = super.getPopupStep()
-
-
+            @Deprecated("implement {@link #getPopup()}")
+            override fun getPopupStep(): ListPopup? = null
 
             override fun getSelectedValue(): String = NauPlugin.getStatusBarText()
 

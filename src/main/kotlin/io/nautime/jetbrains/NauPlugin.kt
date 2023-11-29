@@ -34,6 +34,7 @@ import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
+import javax.swing.UIManager
 
 const val JOB_PERIOD_SEC = 60L
 const val MIN_DURATION_FOR_SAME_TARGET_SEC = 60L // min duration before add events for same target
@@ -397,5 +398,7 @@ class NauPlugin() : Disposable {
             if (mins == 0L) return "${hours}h"
             return "${hours}h ${mins}m"
         }
+
+        fun isUnderDarcula(): Boolean = UIManager.getLookAndFeel().name.contains("Darcula")
     }
 }

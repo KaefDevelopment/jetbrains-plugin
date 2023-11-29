@@ -11,7 +11,6 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.StatusBarWidgetFactory
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.util.Consumer
-import com.intellij.util.ui.UIUtil
 import io.nautime.jetbrains.NauPlugin
 import org.jetbrains.annotations.NonNls
 import java.awt.event.MouseEvent
@@ -64,7 +63,7 @@ class NauStatusBar : StatusBarWidgetFactory {
             override fun getSelectedValue(): String = NauPlugin.getStatusBarText()
 
             override fun getIcon(): Icon {
-                val theme = if (UIUtil.isUnderDarcula()) "dark" else "light"
+                val theme = if (NauPlugin.isUnderDarcula()) "dark" else "light"
                 return getIcon("/icons/status-bar-icon-$theme.svg", NauPlugin::class.java)
             }
 

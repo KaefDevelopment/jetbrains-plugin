@@ -5,14 +5,14 @@ plugins {
 }
 
 group = "nautime.io"
-version = "1.0.5"
+version = "1.0.6"
 
 repositories {
     mavenCentral()
 }
 
 intellij {
-    version.set("2023.1")
+    version.set("2023.2")
 
     pluginName.set("nautime.io")
 //    plugins.addAll("git4idea")

@@ -2,6 +2,7 @@ package io.nautime.jetbrains
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
+import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -11,7 +12,6 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.util.PlatformUtils
 import com.intellij.util.concurrency.AppExecutorUtil
 import io.nautime.jetbrains.model.EventDto
 import io.nautime.jetbrains.model.EventParamsMap
@@ -55,7 +55,7 @@ class NauPlugin() : Disposable {
 
     init {
         log.info("Initialize plugin! project: ")
-        ideType = PlatformUtils.getPlatformPrefix()
+        ideType = ApplicationNamesInfo.getInstance().productName
         ideVersion = ApplicationInfo.getInstance().fullVersion
         log.info("IDE type: $ideType IDE version: $ideVersion")
         eventQueue = ConcurrentLinkedQueue()

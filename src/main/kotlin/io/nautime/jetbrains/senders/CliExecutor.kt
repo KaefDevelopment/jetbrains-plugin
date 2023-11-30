@@ -8,7 +8,6 @@ import io.nautime.jetbrains.ex.CliNotReadyEx
 import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.utils.OsHelper
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
@@ -133,7 +132,7 @@ class CliExecutor : Sender {
     private fun formatJson(json: String): String {
         return when {
             OsHelper.isWindows() -> "\"${json.replace("\"", "\\\"")}\""
-            else -> json
+            else -> "'$json'"
         }
     }
 

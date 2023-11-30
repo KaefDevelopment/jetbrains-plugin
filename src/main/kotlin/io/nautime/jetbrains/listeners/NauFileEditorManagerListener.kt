@@ -10,6 +10,7 @@ class NauFileEditorManagerListener : FileEditorManagerListener {
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
 //        KaefPlugin.log.info("fileOpened ${file.name}")
+        if(!NauPlugin.isInit()) return
         NauPlugin.getInstance().addEvent(EventType.DOCUMENT_OPEN, source.project, file)
     }
 }

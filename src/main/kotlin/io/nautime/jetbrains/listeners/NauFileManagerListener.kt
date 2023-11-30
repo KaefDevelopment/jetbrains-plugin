@@ -9,6 +9,7 @@ import io.nautime.jetbrains.utils.getProject
 open class NauFileManagerListener() : FileDocumentManagerListener {
     override fun beforeDocumentSaving(document: Document) {
 //        KaefPlugin.log.info("FileManagerListener beforeDocumentSaving ${document.getFile()?.name}")
+        if(!NauPlugin.isInit()) return
         NauPlugin.getInstance().addEvent(EventType.DOCUMENT_SAVE, document.getProject(), document)
     }
 }

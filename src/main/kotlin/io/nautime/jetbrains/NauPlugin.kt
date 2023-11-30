@@ -362,14 +362,14 @@ class NauPlugin() : Disposable {
 
     companion object {
         val log = Logger.getInstance("nautime.io")
+        private var initPlugin = false
+
         private lateinit var plugin: NauPlugin
         private lateinit var pluginState: PluginState
         private lateinit var pluginStateHolder: PluginStateHolder
         private lateinit var notificationService: NotificationService
         private lateinit var fileDb: FileDb
         private var stats: Stats? = null
-
-        private var initPlugin = false
 
         fun getInstance(): NauPlugin = plugin
 

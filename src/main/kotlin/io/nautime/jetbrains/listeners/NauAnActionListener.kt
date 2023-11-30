@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent
 class NauAnActionListener : AnActionListener {
 
     override fun beforeActionPerformed(action: AnAction, event: AnActionEvent) {
+        if(!NauPlugin.isInit()) return
+
         NauPlugin.log.info("beforeActionPerformed $action ${event.inputEvent}")
 
         val inputEvent = event.inputEvent

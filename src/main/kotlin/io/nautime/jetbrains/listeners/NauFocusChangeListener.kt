@@ -9,6 +9,7 @@ import java.awt.event.FocusEvent
 class NauFocusChangeListener : FocusChangeListener {
 
     override fun focusGained(editor: Editor, event: FocusEvent) {
+        if(!NauPlugin.isInit()) return
         NauPlugin.getInstance().addEvent(EventType.DOCUMENT_FOCUS, editor.project, editor.document)
     }
 

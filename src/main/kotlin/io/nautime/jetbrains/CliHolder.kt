@@ -120,7 +120,7 @@ class CliHolder {
             ZipFile(zipFile, 1).use { zip ->
                 zip.entries().asSequence().forEach { entry ->
                     zip.getInputStream(entry).use { input ->
-                        return@use outputFile.outputStream().use { output ->
+                        outputFile.outputStream().use { output ->
                             input.copyTo(output)
                         }
                     }

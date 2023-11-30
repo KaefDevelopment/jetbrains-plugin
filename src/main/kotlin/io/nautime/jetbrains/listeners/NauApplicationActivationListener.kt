@@ -10,6 +10,7 @@ import io.nautime.jetbrains.model.EventType
 class NauApplicationActivationListener : ApplicationActivationListener {
 
     override fun applicationActivated(ideFrame: IdeFrame) {
+        if(!NauPlugin.isInit()) return
 //        KaefPlugin.log.info("applicationActivated ${ideFrame.project?.name}")
 
         NauPlugin.getInstance().addEventProject(EventType.FRAME_IN, ideFrame.project)

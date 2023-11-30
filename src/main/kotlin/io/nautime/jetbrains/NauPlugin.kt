@@ -22,7 +22,6 @@ import io.nautime.jetbrains.model.Stats
 import io.nautime.jetbrains.senders.CliExecutor
 import io.nautime.jetbrains.senders.HttpSender
 import io.nautime.jetbrains.statusbar.NauStatusBar
-import io.nautime.jetbrains.utils.FileDb
 import io.nautime.jetbrains.utils.IdeUtils
 import io.nautime.jetbrains.utils.getCurrentFile
 import io.nautime.jetbrains.utils.getFile
@@ -69,8 +68,8 @@ class NauPlugin() : Disposable {
 
         notificationService = NotificationService()
 
-        fileDb = FileDb()
-        fileDb.init()
+//        fileDb = FileDb()
+//        fileDb.init()
 
         plugin = this
         initPlugin = true
@@ -221,7 +220,7 @@ class NauPlugin() : Disposable {
 
     private fun addToQueueAndDb(event: EventDto) {
         eventQueue.add(event)
-        fileDb.add(event.print())
+//        fileDb.add(event.print())
     }
 
 
@@ -357,7 +356,7 @@ class NauPlugin() : Disposable {
 
     override fun dispose() {
         mainJobFuture.cancel(false)
-        fileDb.close()
+//        fileDb.close()
     }
 
     companion object {
@@ -368,7 +367,7 @@ class NauPlugin() : Disposable {
         private lateinit var pluginState: PluginState
         private lateinit var pluginStateHolder: PluginStateHolder
         private lateinit var notificationService: NotificationService
-        private lateinit var fileDb: FileDb
+//        private lateinit var fileDb: FileDb
         private var stats: Stats? = null
 
         fun getInstance(): NauPlugin = plugin

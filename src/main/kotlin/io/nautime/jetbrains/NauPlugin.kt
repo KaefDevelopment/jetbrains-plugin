@@ -107,7 +107,9 @@ class NauPlugin() : Disposable {
             if (sendByCli()) return
         }
 
-        sendByHttp()
+        if (pluginState.isLinked) {
+            sendByHttp()
+        }
     }
 
     private fun checkCli() {

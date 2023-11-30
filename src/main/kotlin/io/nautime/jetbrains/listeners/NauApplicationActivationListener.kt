@@ -17,6 +17,7 @@ class NauApplicationActivationListener : ApplicationActivationListener {
     }
 
     override fun applicationDeactivated(ideFrame: IdeFrame) {
+        if(!NauPlugin.isInit()) return
 //        KaefPlugin.log.info("documentChanged ${ideFrame.project?.name}")
 
         if(ideFrame is FlatWelcomeFrame || ideFrame is WelcomeFrame) {

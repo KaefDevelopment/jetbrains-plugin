@@ -13,6 +13,8 @@ class KeyHandler : TypedHandlerDelegate() {
 
 
     override fun charTyped(c: Char, project: Project, editor: Editor, file: PsiFile): Result {
+        if(!NauPlugin.isInit()) return super.charTyped(c, project, editor, file)
+
         val document: Document = editor.document
 
         NauPlugin.getInstance().addEvent(EventType.KEY, project, document) // , mapOf("key" to c.toString())

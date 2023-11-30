@@ -1,6 +1,7 @@
 package io.nautime.jetbrains
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.components.serviceOrNull
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBTextField
@@ -16,49 +17,50 @@ class AppSettingsComponent {
     val panel: JPanel
 
     init {
-        val pluginState = NauPlugin.getState()
-
         val formBuilder = FormBuilder.createFormBuilder()
 
-        if (pluginState.isLinked) {
+        val nauPlugin = serviceOrNull<NauPlugin>()
+        if (nauPlugin == null) {
             formBuilder.addLabeledComponent(
-                Label("Plugin is linked. You can explore your working activity on"),
-                Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") })
-
-            formBuilder.addComponent(
-                JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-                    add(JBTextField(pluginState.pluginId, 28))
-                    add(ActionLink("copy") {
-                        CopyPasteManager.getInstance().setContents(TextTransferable(pluginState.pluginId as String?))
-                    })
-                }
+                Label("Visit"),
+                Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") }
             )
         } else {
-            formBuilder.addComponent(
-                JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-                    add(Link("Follow link") { BrowserUtil.browse(NauPlugin.getPluginLinkUrl()) })
-                    add(Label("to connect Nau plugin"))
-                }
-            )
+            val pluginState = nauPlugin.getState()
 
-            formBuilder.addComponent(
-                JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-                    add(Label("Or copy plugin uuid and past it on"))
-                    add(Link("Nau dashboard") { BrowserUtil.browse(NauPlugin.getDashboardUrl()) })
-                }
-            )
+            if (pluginState.isLinked) {
+                formBuilder.addLabeledComponent(
+                    Label("Plugin is linked. You can explore your working activity on"),
+                    Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") }
+                )
 
-            formBuilder.addComponent(
-                JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+                formBuilder.addComponent(JPanel(FlowLayout(FlowLayout.LEFT)).apply {
                     add(JBTextField(pluginState.pluginId, 28))
                     add(ActionLink("copy") {
                         CopyPasteManager.getInstance().setContents(TextTransferable(pluginState.pluginId as String?))
                     })
-                }
-            )
-        }
+                })
+            } else {
+                formBuilder.addComponent(JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+                    add(Link("Follow link") { BrowserUtil.browse(nauPlugin.getPluginLinkUrl()) })
+                    add(Label("to connect Nau plugin"))
+                })
 
-        formBuilder.addComponentFillVertically(JPanel(), 0)
+                formBuilder.addComponent(JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+                    add(Label("Or copy plugin uuid and past it on"))
+                    add(Link("Nau dashboard") { BrowserUtil.browse(nauPlugin.getDashboardUrl()) })
+                })
+
+                formBuilder.addComponent(JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+                    add(JBTextField(pluginState.pluginId, 28))
+                    add(ActionLink("copy") {
+                        CopyPasteManager.getInstance().setContents(TextTransferable(pluginState.pluginId as String?))
+                    })
+                })
+            }
+
+            formBuilder.addComponentFillVertically(JPanel(), 0)
+        }
 
         panel = formBuilder.panel
     }

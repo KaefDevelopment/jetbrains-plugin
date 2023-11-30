@@ -12,9 +12,9 @@ data class PluginStatusResponse(
     val notificationList: List<Notif>,
 ) {
     companion object {
-        val DEFAULT = PluginStatusResponse(
-            auth = NauPlugin.getState().isLinked,
-            cliVersion = NauPlugin.getState().currentCliVer,
+        fun default(nauPlugin: NauPlugin) = PluginStatusResponse(
+            auth = nauPlugin.getState().isLinked,
+            cliVersion = nauPlugin.getState().currentCliVer,
             stats = Stats(0),
             notificationList = emptyList()
         )

@@ -46,9 +46,9 @@ class CliHolder {
         fun isCliReady(): Boolean = CLI_FILE.exists()
 
 
-        fun installCli() {
+        fun installCli(nauPlugin: NauPlugin) {
             // todo checkMissingPlatformSupport
-            val zipFile: File? = downloadCli()
+            val zipFile: File? = downloadCli(nauPlugin)
             if (zipFile == null) {
                 // todo send error to server
                 return
@@ -65,18 +65,18 @@ class CliHolder {
             }
         }
 
-        private fun getGithubCliUrl(): String {
-            return "https://github.com/KaefDevelopment/cli-service/releases/download/${NauPlugin.getState().latestCliVer}/cli-${OsHelper.os.tag}-${OsHelper.arch}${OsHelper.os.ext}.zip"
+        private fun getGithubCliUrl(nauPlugin: NauPlugin): String {
+            return "https://github.com/KaefDevelopment/cli-service/releases/download/${nauPlugin.getState().latestCliVer}/cli-${OsHelper.os.tag}-${OsHelper.arch}${OsHelper.os.ext}.zip"
         }
 
-        private fun downloadCli(): File? {
+        private fun downloadCli(nauPlugin: NauPlugin): File? {
             try {
                 if (!BASE_DIR.exists()) {
                     BASE_DIR.mkdir()
                 }
 
                 val zipFile = File(BASE_DIR, "$CLI_NAME.zip")
-                val githubUrl = URL(getGithubCliUrl())
+                val githubUrl = URL(getGithubCliUrl(nauPlugin))
 
                 NauPlugin.log.info("Download zip $githubUrl")
 

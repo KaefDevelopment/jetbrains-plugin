@@ -1,6 +1,7 @@
 package io.nautime.jetbrains.statusbar
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.components.serviceOrNull
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.ListPopup
@@ -48,10 +49,12 @@ class NauStatusBar : StatusBarWidgetFactory {
 //            private val panel: TextPanel = TextPanel.WithIconAndArrows()
 
             override fun getPopup(): JBPopup? {
-                if (NauPlugin.getState().isLinked) {
-                    BrowserUtil.browse(NauPlugin.getDashboardUrl())
+                val nauPlugin = serviceOrNull<NauPlugin>() ?: return null
+
+                if (nauPlugin.getState().isLinked) {
+                    BrowserUtil.browse(nauPlugin.getDashboardUrl())
                 } else {
-                    BrowserUtil.browse(NauPlugin.getPluginLinkUrl())
+                    BrowserUtil.browse(nauPlugin.getPluginLinkUrl())
                 }
                 if (widget.statusBar != null) widget.statusBar.updateWidget(WIDGET_ID)
                 return null
@@ -60,7 +63,7 @@ class NauStatusBar : StatusBarWidgetFactory {
             @Deprecated("implement {@link #getPopup()}")
             override fun getPopupStep(): ListPopup? = null
 
-            override fun getSelectedValue(): String = NauPlugin.getStatusBarText()
+            override fun getSelectedValue(): String = serviceOrNull<NauPlugin>()?.getStatusBarText() ?: "Nau"
 
             override fun getIcon(): Icon {
                 val theme = if (NauPlugin.isUnderDarcula()) "dark" else "light"

@@ -5,7 +5,6 @@ import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.Sender
 import io.nautime.jetbrains.model.PluginStatusResponse
 import io.nautime.jetbrains.model.SendEventsRequest
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.http.client.methods.HttpPost
@@ -13,14 +12,16 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import java.nio.charset.Charset
 
-class HttpSender : Sender {
+class HttpSender(
+    private val nauPlugin: NauPlugin,
+) : Sender {
 
     // когда слинкуется, отображать в статус баре и забирать partId и инфу по кодингу
 
     override fun send(eventsRequest: SendEventsRequest): Boolean {
         val json = Json.encodeToString(eventsRequest)
 
-        NauPlugin.log.info("[HTTP] start sending events [${NauPlugin.getPluginId()}] $eventsRequest")
+        NauPlugin.log.info("[HTTP] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
 
         HttpClients.createDefault().use { client ->
             val httpPost = HttpPost("$SERVER_ADDRESS/api/plugin/v1/events")
@@ -29,7 +30,7 @@ class HttpSender : Sender {
             httpPost.entity = entity
             httpPost.setHeader("Accept", "application/json")
             httpPost.setHeader("Content-type", "application/json")
-            httpPost.setHeader("Authorization", NauPlugin.getPluginId())
+            httpPost.setHeader("Authorization", nauPlugin.getPluginId())
 
             client.execute(httpPost).use { response ->
                 val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
@@ -54,7 +55,7 @@ class HttpSender : Sender {
             val entity = StringEntity("{}")
 
             val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status")
-            httpPost.setHeader("Authorization", NauPlugin.getPluginId())
+            httpPost.setHeader("Authorization", nauPlugin.getPluginId())
             httpPost.setHeader("Accept", "application/json")
             httpPost.setHeader("Content-type", "application/json")
             httpPost.entity = entity
@@ -64,7 +65,7 @@ class HttpSender : Sender {
                 NauPlugin.log.info("Get status response: ${response.statusLine.statusCode} $responseBody")
                 if (response.statusLine.statusCode != 200) {
                     // todo rewrite it
-                    return PluginStatusResponse.DEFAULT
+                    return PluginStatusResponse.default(nauPlugin)
                 }
 
                 return Json.decodeFromString<PluginStatusResponse>(responseBody)

@@ -43,14 +43,21 @@ const val SERVER_ADDRESS = "https://nautime.io"
 @Service
 class NauPlugin() : Disposable {
 
-    private val httpSender = HttpSender()
-    private val cliExecutor = CliExecutor()
+    private val httpSender = HttpSender(this)
+    private val cliExecutor = CliExecutor(this)
 
     private val osName: String
     private val systemName: String
     private val ideType: String
     private val ideVersion: String
     private val eventQueue: Queue<EventDto>
+
+    private var pluginState: PluginState
+    private var pluginStateHolder: PluginStateHolder
+    private var notificationService: NotificationService
+
+    //        private lateinit var fileDb: FileDb
+    private var stats: Stats? = null
 
 
     init {
@@ -66,24 +73,24 @@ class NauPlugin() : Disposable {
         pluginState = pluginStateHolder.pluginState
         log.info("Plugin state: $pluginState")
 
-        notificationService = NotificationService()
+        notificationService = NotificationService(this)
 
 //        fileDb = FileDb()
 //        fileDb.init()
 
-        plugin = this
-        initPlugin = true
         log.info("Plugin initialization is done")
 
         if (!pluginState.isLinked) {
-            log.info("Not linked. Start check job")
+            log.info("Not linked.")
             notificationService.showGoToLinkNotif()
         }
     }
 
-    private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 0, JOB_PERIOD_SEC, SECONDS)
+    private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 3, JOB_PERIOD_SEC, SECONDS)
 
     private fun mainJob() {
+        log.info("Execute main job with state: $pluginState")
+
         if (!pluginState.isLinked || pluginState.timeToCheck()) {
             check()
         }
@@ -120,7 +127,7 @@ class NauPlugin() : Disposable {
     private fun initCli() {
         if (!CliHolder.isCliReady() || getState().needCliUpdate) {
             getState().isCliReady = false
-            CliHolder.installCli()
+            CliHolder.installCli(this)
         }
 
         if (CliHolder.isCliReady()) {
@@ -134,7 +141,7 @@ class NauPlugin() : Disposable {
     }
 
     fun init() {
-        if (isInit()) return
+//        if (isInit()) return
 
         log.info("Init NAU plugin. IDE type: $ideType IDE version: $ideVersion State: $pluginState")
     }
@@ -265,7 +272,7 @@ class NauPlugin() : Disposable {
                 response
             } catch (ex: Exception) {
                 log.info("Error during get status request", ex)
-                PluginStatusResponse.DEFAULT
+                PluginStatusResponse.default(this)
             }
 
             if (pluginState.isLinked) {
@@ -359,44 +366,32 @@ class NauPlugin() : Disposable {
 //        fileDb.close()
     }
 
+    fun getState(): PluginState = pluginState
+
+    fun getStats(): Stats? = stats
+
+    fun getPluginId(): String = pluginState.pluginId
+
+    fun getPluginLinkUrl(): String = "https://nautime.io/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
+
+    fun getDashboardUrl(): String = "https://nautime.io/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
+
+    fun getNotificationService(): NotificationService = notificationService
+
+    fun getStatusBarText(): String {
+        if(!getState().isLinked) return "Nau"
+        if (stats == null) return "Nau"
+        val duration = Duration.ofSeconds(stats!!.total)
+        if (duration.toMinutes() == 0L) return "Nau"
+        val hours = duration.toHours()
+        val mins = duration.minusHours(hours).toMinutes()
+        if (hours == 0L) return "${mins}m"
+        if (mins == 0L) return "${hours}h"
+        return "${hours}h ${mins}m"
+    }
+
     companion object {
         val log = Logger.getInstance("nautime.io")
-        private var initPlugin = false
-
-        private lateinit var plugin: NauPlugin
-        private lateinit var pluginState: PluginState
-        private lateinit var pluginStateHolder: PluginStateHolder
-        private lateinit var notificationService: NotificationService
-//        private lateinit var fileDb: FileDb
-        private var stats: Stats? = null
-
-        fun getInstance(): NauPlugin = plugin
-
-        fun isInit(): Boolean = initPlugin
-
-        fun getState(): PluginState = pluginState
-
-        fun getStats(): Stats? = stats
-
-        fun getPluginId(): String = pluginState.pluginId
-
-        fun getPluginLinkUrl(): String = "https://nautime.io/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
-
-        fun getDashboardUrl(): String = "https://nautime.io/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
-
-        fun getNotificationService(): NotificationService = notificationService
-
-        fun getStatusBarText(): String {
-            if(!getState().isLinked) return "Nau"
-            if (stats == null) return "Nau"
-            val duration = Duration.ofSeconds(stats!!.total)
-            if (duration.toMinutes() == 0L) return "Nau"
-            val hours = duration.toHours()
-            val mins = duration.minusHours(hours).toMinutes()
-            if (hours == 0L) return "${mins}m"
-            if (mins == 0L) return "${hours}h"
-            return "${hours}h ${mins}m"
-        }
 
         fun isUnderDarcula(): Boolean = UIManager.getLookAndFeel().name.contains("Darcula")
     }

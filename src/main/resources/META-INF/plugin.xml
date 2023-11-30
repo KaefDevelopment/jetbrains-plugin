@@ -12,7 +12,7 @@
         <li>Inside your IDE, select Settings > Plugins</li>
         <li>Search for Nau Time Tracker</li>
         <li>Install plugin</li>
-        <li>Click on the Nau icon in the status bar and register at <a href="https://nautime.io">nautime.io</a></li>
+        <li>Click on the Nau icon in the status bar and register at <a href="https://nautime.io?utm_source=plugin-jetbrains&utm_content=plugin_desc">nautime.io</a></li>
         <li>Enjoy your coding stats</li>
       </ul>
       <br/>
@@ -62,6 +62,10 @@
 
     <change-notes>
         <![CDATA[
+        1.1.0
+        <br />
+        Bug fixes
+        <br />
         1.0.4
         <br />
         Compatibility fixes

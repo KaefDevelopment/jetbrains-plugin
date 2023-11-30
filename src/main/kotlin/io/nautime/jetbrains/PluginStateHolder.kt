@@ -16,7 +16,7 @@ class PluginStateHolder() : PersistentStateComponent<PluginState> {
     val pluginState: PluginState = PluginState()
 
     override fun getState(): PluginState {
-        NauPlugin.log.info("getState $pluginState")
+//        NauPlugin.log.info("getState $pluginState")
         return pluginState
     }
 

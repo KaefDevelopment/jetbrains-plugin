@@ -9,8 +9,9 @@ import com.intellij.openapi.ui.Messages
 import io.nautime.jetbrains.model.Notif
 
 
-class NotificationService {
-
+class NotificationService(
+    private val nauPlugin: NauPlugin,
+) {
 
 //     todo extend BrowseNotificationAction and track clicks
 
@@ -25,7 +26,7 @@ class NotificationService {
             .addAction(
                 object : BrowseNotificationAction(
                     "Link plugin",
-                    NauPlugin.getPluginLinkUrl()
+                    nauPlugin.getPluginLinkUrl()
                 ) {
                     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
                         super.actionPerformed(e, notification)
@@ -48,7 +49,7 @@ class NotificationService {
             .addAction(
                 BrowseNotificationAction(
                     "Browse your stats",
-                    NauPlugin.getDashboardUrl()
+                    nauPlugin.getDashboardUrl()
                 )
             )
 //            .setIcon(KeyPromoterIcons.KP_ICON)

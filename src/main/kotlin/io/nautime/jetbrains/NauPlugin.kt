@@ -74,6 +74,7 @@ class NauPlugin() : Disposable {
         log.info("Plugin state: $pluginState")
 
         notificationService = NotificationService(this)
+        updateStatusBar()
 
 //        fileDb = FileDb()
 //        fileDb.init()
@@ -383,6 +384,8 @@ class NauPlugin() : Disposable {
     fun getStatusBarText(): String {
         if(!getState().isLinked) return "Nau"
         if (stats == null) return "Nau"
+        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10) return "Nau"
+
         val duration = Duration.ofSeconds(stats!!.total)
         if (duration.toMinutes() == 0L) return "Nau"
         val hours = duration.toHours()

@@ -16,7 +16,7 @@ class FileDb {
         try {
             val userHome = getUserHomeDir()
             if (!userHome.exists()) {
-                NauPlugin.log.warn("home directory doesn't exist. ${System.getProperty("user.home")}")
+                NauPlugin.log.info("home directory doesn't exist. ${System.getProperty("user.home")}")
                 return
             }
 

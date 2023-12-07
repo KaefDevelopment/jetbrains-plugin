@@ -33,6 +33,7 @@ import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.locks.ReentrantLock
 import javax.swing.UIManager
 
 const val JOB_PERIOD_SEC = 60L
@@ -89,28 +90,45 @@ class NauPlugin() : Disposable {
 
     private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 3, JOB_PERIOD_SEC, SECONDS)
 
+    val lock = ReentrantLock()
+
     private fun mainJob() {
-        log.info("Execute main job with state: $pluginState")
+        if (!lock.tryLock()) return
 
-        if (!pluginState.isLinked || pluginState.timeToCheck()) {
-            check()
-        }
+        try {
+            log.info("Execute main job with state: $pluginState")
 
-        if (!pluginState.isCliReady) {
-            checkCli()
-        }
+            if (!pluginState.isLinked || pluginState.timeToCheck()) {
+                check()
+            }
 
-        if (pluginState.needCliUpdate) {
-            initCli()
-        }
+            if (!pluginState.isCliReady) {
+                checkCli()
+            }
 
-        if (pluginState.isCliReady) {
-            if (sendByCli()) return
-        }
+            if (pluginState.needCliUpdate) {
+                initCli()
+            }
 
-        if (pluginState.isLinked) {
-            sendByHttp()
+            if (pluginState.isCliReady) {
+                if (sendByCli()) return
+            }
+
+            if (pluginState.isLinked) {
+                sendByHttp()
+            }
+        } catch (ex: Exception) {
+            log.info("mainJob error", ex)
+        } finally {
+            lock.unlock()
         }
+    }
+
+    fun checkLink() {
+        AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 5, SECONDS)
+        AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 15, SECONDS)
+        AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 30, SECONDS)
+        AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 45, SECONDS)
     }
 
     private fun checkCli() {
@@ -139,7 +157,7 @@ class NauPlugin() : Disposable {
             getState().currentCliVer = cliExecutor.version()
             log.info("Setup currentCliVer to ${getState().currentCliVer}")
         } else {
-            log.warn("Cli not installed..")
+            log.info("Cli not installed..")
         }
     }
 
@@ -223,7 +241,7 @@ class NauPlugin() : Disposable {
         count = 1
         keys = 0
 
-        log.info("Event added $event")
+//        log.info("Event added $event")
         lastTime = now
     }
 
@@ -365,6 +383,7 @@ class NauPlugin() : Disposable {
 
 
     override fun dispose() {
+        httpSender.httpClient.close()
         mainJobFuture.cancel(false)
 //        fileDb.close()
     }

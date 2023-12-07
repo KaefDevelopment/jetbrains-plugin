@@ -30,7 +30,7 @@ class NotificationService(
                 ) {
                     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
                         super.actionPerformed(e, notification)
-                        // todo
+                        nauPlugin.checkLink()
                     }
                 }
             )

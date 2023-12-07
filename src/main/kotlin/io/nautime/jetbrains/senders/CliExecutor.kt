@@ -3,7 +3,6 @@ package io.nautime.jetbrains.senders
 import io.nautime.jetbrains.CliHolder
 import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.SERVER_ADDRESS
-import io.nautime.jetbrains.Sender
 import io.nautime.jetbrains.ex.CliNotReadyEx
 import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.utils.OsHelper
@@ -18,9 +17,9 @@ import java.util.stream.Collectors
 
 class CliExecutor(
     private val nauPlugin: NauPlugin,
-) : Sender {
+) {
 
-    override fun send(eventsRequest: SendEventsRequest): Boolean {
+    fun send(eventsRequest: SendEventsRequest): Boolean {
         val json = Json.encodeToString(eventsRequest)
 
         NauPlugin.log.info("[Cli] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
@@ -34,14 +33,12 @@ class CliExecutor(
         try {
 
             val path = CliHolder.CLI_FILE.absolutePath
-            val cmds = "$path event -d ${formatJson(json)} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
+            val cmds = "$path event -d events:${eventsRequest.events.size} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
 
             NauPlugin.log.info("Execute cli with cmds $cmds")
 
             val pb = ProcessBuilder(path, "event", "-d", formatJson(json), "-k", nauPlugin.getPluginId(), "-s", "$SERVER_ADDRESS/api/plugin/v1/events")
             val proc = pb.start()
-
-//            val proc = Runtime.getRuntime().exec(cmds)
 
             try {
                 val stdin = BufferedWriter(OutputStreamWriter(proc.outputStream))
@@ -63,7 +60,7 @@ class CliExecutor(
 
             val stdoutStr = stdout.lines().collect(Collectors.joining())
             if (stdoutStr.isNotBlank()) {
-                NauPlugin.log.warn("[Cli] Events sent out $stdoutStr")
+                NauPlugin.log.info("[Cli] Events sent out $stdoutStr")
                 val response: StatusResponse = Json.decodeFromString(stdoutStr)
                 if (response.status) NauPlugin.log.info("[Cli] Events sent")
                 return response.status
@@ -97,7 +94,7 @@ class CliExecutor(
 
         if (!CliHolder.isCliReady()) {
             nauPlugin.getState().isCliReady = false
-            NauPlugin.log.warn("Cli not found. Set isCliReady to false")
+            NauPlugin.log.info("Cli not found. Set isCliReady to false")
             throw CliNotReadyEx()
         }
 
@@ -116,7 +113,7 @@ class CliExecutor(
             val out = stdout.lines().collect(Collectors.joining())
             val err = stderr.lines().collect(Collectors.joining())
 
-            if (out.isNotBlank()) NauPlugin.log.warn("Get version out $out")
+            if (out.isNotBlank()) NauPlugin.log.info("Get version out $out")
             if (err.isNotBlank()) NauPlugin.log.warn("Get version err $err")
 
             return out

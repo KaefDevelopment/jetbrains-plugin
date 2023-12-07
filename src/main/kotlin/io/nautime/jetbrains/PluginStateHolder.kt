@@ -51,13 +51,30 @@ data class PluginState(
     }
 
     fun tryUpdateCliVersion(newVersion: String) {
-        if (latestCliVer != newVersion) {
+        if (Version(latestCliVer) < Version(newVersion)) {
             latestCliVer = newVersion
             needCliUpdate = true
             NauPlugin.log.info("Set new latestCliVer: $latestCliVer")
         }
     }
 
-    fun needCliUpdate() = latestCliVer != currentCliVer
+    fun needCliUpdate() = Version(latestCliVer) > Version(currentCliVer)
 
+}
+
+/**
+ * Represents a version number in the format v1.1.1
+ */
+data class Version(
+    private val vStr: String,
+) {
+    private val v: List<Int> = vStr.removePrefix("v").split(".").map { it.toInt() }
+
+    operator fun compareTo(other: Version): Int {
+        for(i in v.indices) {
+            if (v[i] > other.v[i]) return 1
+            if (v[i] < other.v[i]) return -1
+        }
+        return 0
+    }
 }

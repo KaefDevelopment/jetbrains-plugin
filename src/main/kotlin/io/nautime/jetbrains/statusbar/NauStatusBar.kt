@@ -33,7 +33,7 @@ class NauStatusBar : StatusBarWidgetFactory {
 
 //    override fun disposeWidget(widget: StatusBarWidget) {}
 
-    inner class NauStatusBarWidget constructor(val project: Project) : StatusBarWidget {
+    inner class NauStatusBarWidget(val project: Project) : StatusBarWidget {
         val statusBar: StatusBar? = WindowManager.getInstance().getStatusBar(project)
 
         override fun ID(): String = WIDGET_ID
@@ -55,6 +55,7 @@ class NauStatusBar : StatusBarWidgetFactory {
                     BrowserUtil.browse(nauPlugin.getDashboardUrl())
                 } else {
                     BrowserUtil.browse(nauPlugin.getPluginLinkUrl())
+                    nauPlugin.checkLink()
                 }
                 if (widget.statusBar != null) widget.statusBar.updateWidget(WIDGET_ID)
                 return null

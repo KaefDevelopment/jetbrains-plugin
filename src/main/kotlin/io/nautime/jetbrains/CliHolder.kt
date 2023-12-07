@@ -60,6 +60,7 @@ class CliHolder {
                 makeExecutable(CLI_FILE)
                 zipFile.delete()
                 NauPlugin.log.info("Cli installed")
+                // todo send event about install
             } catch (ex: IOException) {
                 NauPlugin.log.info("Cli install error", ex)
             }

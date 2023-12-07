@@ -1,8 +1,9 @@
 package io.nautime.jetbrains.senders
 
+import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.openapi.extensions.PluginId
 import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.SERVER_ADDRESS
-import io.nautime.jetbrains.Sender
 import io.nautime.jetbrains.model.PluginStatusResponse
 import io.nautime.jetbrains.model.SendEventsRequest
 import kotlinx.serialization.encodeToString
@@ -14,32 +15,30 @@ import java.nio.charset.Charset
 
 class HttpSender(
     private val nauPlugin: NauPlugin,
-) : Sender {
+) {
+    val httpClient = HttpClients.createDefault()
 
-    // когда слинкуется, отображать в статус баре и забирать partId и инфу по кодингу
-
-    override fun send(eventsRequest: SendEventsRequest): Boolean {
+    fun send(eventsRequest: SendEventsRequest): Boolean {
         val json = Json.encodeToString(eventsRequest)
 
         NauPlugin.log.info("[HTTP] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
 
-        HttpClients.createDefault().use { client ->
-            val httpPost = HttpPost("$SERVER_ADDRESS/api/plugin/v1/events")
+        val httpPost = HttpPost("$SERVER_ADDRESS/api/plugin/v1/events")
 
-            val entity = StringEntity(json)
-            httpPost.entity = entity
-            httpPost.setHeader("Accept", "application/json")
-            httpPost.setHeader("Content-type", "application/json")
-            httpPost.setHeader("Authorization", nauPlugin.getPluginId())
+        val entity = StringEntity(json)
+        httpPost.entity = entity
+        httpPost.setHeader("Accept", "application/json")
+        httpPost.setHeader("Content-type", "application/json")
+        httpPost.setHeader("Authorization", nauPlugin.getPluginId())
+        httpPost.setHeader("X-Version", PluginManagerCore.getPlugin(PluginId.getId("nautime.io"))?.version ?: "0.0.0")
 
-            client.execute(httpPost).use { response ->
-                val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
-                NauPlugin.log.info("[HTTP] send events result: ${response.statusLine.statusCode} $responseBody")
+        httpClient.execute(httpPost).use { response ->
+            val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
+            NauPlugin.log.info("[HTTP] send events result: ${response.statusLine.statusCode} $responseBody")
 
-                if (response.statusLine.statusCode != 200) {
-                    NauPlugin.log.info("[HTTP] Events send error: ${response.statusLine.statusCode}")
-                    return false
-                }
+            if (response.statusLine.statusCode != 200) {
+                NauPlugin.log.info("[HTTP] Events send error: ${response.statusLine.statusCode}")
+                return false
             }
         }
 
@@ -51,25 +50,23 @@ class HttpSender(
     fun getStatus(pluginId: String): PluginStatusResponse {
         NauPlugin.log.info("Get status $pluginId")
 
-        HttpClients.createDefault().use { client ->
-            val entity = StringEntity("{}")
+        val entity = StringEntity("{}")
 
-            val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status")
-            httpPost.setHeader("Authorization", nauPlugin.getPluginId())
-            httpPost.setHeader("Accept", "application/json")
-            httpPost.setHeader("Content-type", "application/json")
-            httpPost.entity = entity
+        val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status")
+        httpPost.setHeader("Authorization", nauPlugin.getPluginId())
+        httpPost.setHeader("Accept", "application/json")
+        httpPost.setHeader("Content-type", "application/json")
+        httpPost.entity = entity
 
-            client.execute(httpPost).use { response ->
-                val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
-                NauPlugin.log.info("Get status response: ${response.statusLine.statusCode} $responseBody")
-                if (response.statusLine.statusCode != 200) {
-                    // todo rewrite it
-                    return PluginStatusResponse.default(nauPlugin)
-                }
-
-                return Json.decodeFromString<PluginStatusResponse>(responseBody)
+        httpClient.execute(httpPost).use { response ->
+            val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
+            NauPlugin.log.info("Get status response: ${response.statusLine.statusCode} $responseBody")
+            if (response.statusLine.statusCode != 200) {
+                // todo rewrite it
+                return PluginStatusResponse.default(nauPlugin)
             }
+
+            return Json.decodeFromString<PluginStatusResponse>(responseBody)
         }
     }
 

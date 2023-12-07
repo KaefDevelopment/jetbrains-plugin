@@ -34,9 +34,8 @@ data class EventDto(
     val target: String?,
     val branch: String?,
     var params: EventParamsMap = mapOf(),
+    val timezone: String = ZoneId.systemDefault().id,
 ) {
-
-    val timezone: String = ZoneId.systemDefault().id
 
     fun print(): String = "$createdAt|$type|$project|$language|$target|$timezone|$params"
 

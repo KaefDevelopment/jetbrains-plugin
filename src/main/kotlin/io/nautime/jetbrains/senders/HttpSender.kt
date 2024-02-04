@@ -52,11 +52,14 @@ class HttpSender(
 
         val entity = StringEntity("{}")
 
-        val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status")
+        val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status2")
         httpPost.setHeader("Authorization", nauPlugin.getPluginId())
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-type", "application/json")
+        httpPost.setHeader("X-Version", PluginManagerCore.getPlugin(PluginId.getId("nautime.io"))?.version ?: "0.0.0")
         httpPost.entity = entity
+
+        // todo send information about status bar hide
 
         httpClient.execute(httpPost).use { response ->
             val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())

@@ -15,7 +15,7 @@ data class PluginStatusResponse(
         fun default(nauPlugin: NauPlugin) = PluginStatusResponse(
             auth = nauPlugin.getState().isLinked,
             cliVersion = nauPlugin.getState().currentCliVer,
-            stats = Stats(0),
+            stats = Stats(0, null),
             notificationList = emptyList()
         )
     }
@@ -25,6 +25,13 @@ data class PluginStatusResponse(
 @Serializable
 data class Stats(
     val total: Long,
+    val goal: GoalStats?,
+)
+
+@Serializable
+data class GoalStats(
+    val duration: Long,
+    val percent: Long,
 )
 
 @Serializable

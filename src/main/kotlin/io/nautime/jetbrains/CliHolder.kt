@@ -10,6 +10,8 @@ import java.io.IOException
 import java.net.URL
 import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
+import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.security.cert.X509Certificate
 import java.util.zip.ZipFile
 import javax.net.ssl.HttpsURLConnection
@@ -28,7 +30,7 @@ class CliHolder {
             return File(BASE_DIR, "$CLI_NAME${OsHelper.os.ext}")
         }
 
-        fun getBaseDir(): File {
+        private fun getBaseDir(): File {
             val nauHome: String = getSystemEnv(NAU_HOME)
             val homeDir: File = when {
                 nauHome.isNotBlank() -> nauHome
@@ -39,8 +41,16 @@ class CliHolder {
             val nauDir = File(homeDir, NAU_DIR)
             if (!nauDir.exists()) {
                 nauDir.mkdir()
+                makeHiddenFolder(nauDir)
             }
             return nauDir
+        }
+
+        private fun makeHiddenFolder(nauDir: File) {
+            try {
+                Files.setAttribute(nauDir.toPath(), "dos:hidden", true, LinkOption.NOFOLLOW_LINKS)
+            } catch (_: Exception) {
+            }
         }
 
         fun isCliReady(): Boolean = CLI_FILE.exists()
@@ -59,10 +69,10 @@ class CliHolder {
                 unzip(zipFile, CLI_FILE)
                 makeExecutable(CLI_FILE)
                 zipFile.delete()
-                NauPlugin.log.info("Cli installed")
+                NauPlugin.log.info("Cli installed version ${nauPlugin.getState().latestCliVer}")
                 // todo send event about install
             } catch (ex: IOException) {
-                NauPlugin.log.info("Cli install error", ex)
+                NauPlugin.log.info("Cli install error version ${nauPlugin.getState().latestCliVer}", ex)
             }
         }
 
@@ -76,7 +86,7 @@ class CliHolder {
                     BASE_DIR.mkdir()
                 }
 
-                val zipFile = File(BASE_DIR, "$CLI_NAME.zip")
+                val zipFile = File(BASE_DIR, "$CLI_NAME.zip") // todo add ide type?
                 val githubUrl = URL(getGithubCliUrl(nauPlugin))
 
                 NauPlugin.log.info("Download zip $githubUrl")
@@ -129,7 +139,7 @@ class CliHolder {
             }
         }
 
-        val trustManager = object : X509TrustManager {
+        private val trustManager = object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
             }
 
@@ -143,7 +153,7 @@ class CliHolder {
         }
 
         const val NAU_HOME = "NAU_HOME"
-        const val NAU_DIR = "nau"
+        const val NAU_DIR = ".nau"
         const val WINDOWS_HOME = "USERPROFILE"
         const val NIX_HOME = "user.home"
         const val CLI_NAME = "cli"

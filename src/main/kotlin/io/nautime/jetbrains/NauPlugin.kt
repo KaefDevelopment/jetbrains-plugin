@@ -21,7 +21,7 @@ import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.model.Stats
 import io.nautime.jetbrains.senders.CliExecutor
 import io.nautime.jetbrains.senders.HttpSender
-import io.nautime.jetbrains.statusbar.NauStatusBar
+import io.nautime.jetbrains.statusbar.NauStatusBarFactory
 import io.nautime.jetbrains.utils.IdeUtils
 import io.nautime.jetbrains.utils.getCurrentFile
 import io.nautime.jetbrains.utils.getFile
@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.locks.ReentrantLock
-import javax.swing.UIManager
 
 const val JOB_PERIOD_SEC = 60L
 const val MIN_DURATION_FOR_SAME_TARGET_SEC = 60L // min duration before add events for same target
@@ -88,19 +87,21 @@ class NauPlugin() : Disposable {
         }
     }
 
-    private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 3, JOB_PERIOD_SEC, SECONDS)
+    private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 1, JOB_PERIOD_SEC, SECONDS)
 
-    val lock = ReentrantLock()
+    private val lock = ReentrantLock()
 
     private fun mainJob() {
         if (!lock.tryLock()) return
 
         try {
-            log.info("Execute main job with state: $pluginState")
+//            log.info("Execute main job with state: $pluginState")
 
             if (!pluginState.isLinked || pluginState.timeToCheck()) {
                 check()
             }
+
+            checkCliExist()
 
             if (!pluginState.isCliReady) {
                 checkCli()
@@ -111,12 +112,10 @@ class NauPlugin() : Disposable {
             }
 
             if (pluginState.isCliReady) {
-                if (sendByCli()) return
+                sendByCli()
             }
 
-            if (pluginState.isLinked) {
-                sendByHttp()
-            }
+            updateStatusBar()
         } catch (ex: Exception) {
             log.info("mainJob error", ex)
         } finally {
@@ -131,12 +130,16 @@ class NauPlugin() : Disposable {
         AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 45, SECONDS)
     }
 
+    private fun checkCliExist(): Boolean {
+        if (CliHolder.isCliReady()) return true
+        pluginState.isCliReady = false
+        getState().needCliUpdate = true
+        log.info("Cli not found")
+        return false
+    }
+
     private fun checkCli() {
-        if (!CliHolder.isCliReady()) {
-            getState().needCliUpdate = true
-            log.info("Cli not found")
-            return
-        }
+        if (!checkCliExist()) return
 
         pluginState.isCliReady = true
         pluginState.currentCliVer = cliExecutor.version()
@@ -212,7 +215,7 @@ class NauPlugin() : Disposable {
             if (event.type == EventType.KEY) {
                 keys++
             } else {
-                addToQueueAndDb(event)
+                addToQueue(event)
                 lastTimeEmptyTarget = Instant.now()
             }
 //            lastEvent = event
@@ -226,17 +229,17 @@ class NauPlugin() : Disposable {
                 keys++
                 count++
             } else if (event.params.isNotEmpty()) {
-                addToQueueAndDb(event)
+                addToQueue(event)
                 count = 1
             }
             return
         }
 
         if (count > 0 || keys > 0) {
-            addToQueueAndDb(lastEvent.copy(createdAt = event.createdAt, params = mapOf("count" to "$count", "keys" to "$keys") + event.params))
+            addToQueue(lastEvent.copy(createdAt = event.createdAt, params = mapOf("count" to "$count", "keys" to "$keys") + event.params))
         }
 
-        addToQueueAndDb(event)
+        addToQueue(event)
         lastEvent = event
         count = 1
         keys = 0
@@ -246,9 +249,8 @@ class NauPlugin() : Disposable {
     }
 
 
-    private fun addToQueueAndDb(event: EventDto) {
+    private fun addToQueue(event: EventDto) {
         eventQueue.add(event)
-//        fileDb.add(event.print())
     }
 
 
@@ -363,29 +365,18 @@ class NauPlugin() : Disposable {
         }
     }
 
-    private fun sendByHttp(): Boolean {
-        return try {
-            baseSend { sendRequest ->
-                return@baseSend httpSender.send(sendRequest)
-            }
-        } catch (ex: Exception) {
-            log.info("Send by http error", ex)
-            false
-        }
-    }
-
     private fun updateStatusBar() {
         ProjectManager.getInstance().openProjects.filter { !it.isDisposed }.map { project ->
             val statusbar = WindowManager.getInstance().getStatusBar(project) ?: return
-            statusbar.updateWidget(NauStatusBar.WIDGET_ID)
+            statusbar.updateWidget(NauStatusBarFactory.WIDGET_ID)
         }
     }
 
 
     override fun dispose() {
+        sendByCli()
         httpSender.httpClient.close()
         mainJobFuture.cancel(false)
-//        fileDb.close()
     }
 
     fun getState(): PluginState = pluginState
@@ -402,13 +393,34 @@ class NauPlugin() : Disposable {
 
     fun getStatusBarText(): String {
         if(!getState().isLinked) return "Nau"
-        if (stats == null) return "Nau"
-        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10) return "Nau"
+        val curStats = stats ?: return "Nau"
+        if (!getState().showStats) return "Nau"
+        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10) return "Nau.."
 
-        val duration = Duration.ofSeconds(stats!!.total)
+        val duration = Duration.ofSeconds(curStats.total)
         if (duration.toMinutes() == 0L) return "Nau"
-        val hours = duration.toHours()
-        val mins = duration.minusHours(hours).toMinutes()
+        return " ${duration.toToTimeStr()}"
+    }
+
+    fun getStatusBarTitle(): String {
+        if (!getState().isLinked) return "Click on the bar and link plugin"
+        val curStats = stats ?: return "Nau"
+        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10)
+            return "Nau work in offline mode. All your stats will be saved"
+
+        return "<table>" +
+                "<tr><td>Total time:</td><td align=right>${Duration.ofSeconds(curStats.total).toToTimeStr()}</td></tr>" +
+                (curStats.goal?.let { goalStats ->
+                    "<tr><td>Goal progress:</td><td align=right>${goalStats.percent}% of ${Duration.ofSeconds(goalStats.duration).toToTimeStr()}</td></tr>"
+                } ?: "") +
+                "<tr><td colspan=\"2\">Find additional statistics on the web dashboard</td></tr>" +
+                "</table>"
+    }
+
+    fun Duration.toToTimeStr(): String {
+        if (this.toMinutes() == 0L) return "0m"
+        val hours = this.toHours()
+        val mins = this.minusHours(hours).toMinutes()
         if (hours == 0L) return "${mins}m"
         if (mins == 0L) return "${hours}h"
         return "${hours}h ${mins}m"
@@ -416,7 +428,5 @@ class NauPlugin() : Disposable {
 
     companion object {
         val log = Logger.getInstance("nautime.io")
-
-        fun isUnderDarcula(): Boolean = UIManager.getLookAndFeel().name.contains("Darcula")
     }
 }

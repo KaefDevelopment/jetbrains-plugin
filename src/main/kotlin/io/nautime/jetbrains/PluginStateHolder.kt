@@ -27,15 +27,16 @@ class PluginStateHolder() : PersistentStateComponent<PluginState> {
 
 }
 
-
 data class PluginState(
     var pluginId: String = UUID.randomUUID().toString(),
     var isLinked: Boolean = false,
     var isCliReady: Boolean = false,
     var needCliUpdate: Boolean = false,
     var currentCliVer: String = "",
-    var latestCliVer: String = "v1.0.0",
+    var latestCliVer: String = "v1.0.3",
     var latestCheckVal: Long = 0L,
+    var showStats: Boolean = true,
+    var showGoalProgress: Boolean = true,
 ) {
 
     @get:Transient

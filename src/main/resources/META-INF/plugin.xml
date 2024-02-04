@@ -28,9 +28,10 @@
                 id="nautime.io"
         />
 
-        <statusBarWidgetFactory implementation="io.nautime.jetbrains.statusbar.NauStatusBar"
-                                id="NauStatusBar"
+        <statusBarWidgetFactory implementation="io.nautime.jetbrains.statusbar.NauStatusBarFactory"
+                                id="Nau"
                                 order="last" />
+
 
 <!--        <postStartupActivity implementation="io.nautime.jetbrains.extension.NauProjectActivity"/>-->
 
@@ -62,6 +63,9 @@
 
     <change-notes>
         <![CDATA[
+        1.2.0
+        <br />
+        Improve toolbar stats
         1.1.0
         <br />
         Bug fixes

@@ -1,18 +1,18 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.10"
-    id("org.jetbrains.intellij") version "1.16.0"
-    kotlin("plugin.serialization") version "1.9.10"
+    id("org.jetbrains.kotlin.jvm") version "1.9.21"
+    id("org.jetbrains.intellij") version "1.17.0"
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 group = "nautime.io"
-version = "1.1.3"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
 }
 
 intellij {
-    version.set("2023.2")
+    version.set("2023.3")
 
     pluginName.set("nautime.io")
 //    plugins.addAll("git4idea")

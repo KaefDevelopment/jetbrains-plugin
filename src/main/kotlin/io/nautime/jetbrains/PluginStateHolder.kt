@@ -33,7 +33,7 @@ data class PluginState(
     var isCliReady: Boolean = false,
     var needCliUpdate: Boolean = false,
     var currentCliVer: String = "",
-    var latestCliVer: String = "v1.0.4",
+    var latestCliVer: String = NauPlugin.MIN_CLI_VERSION,
     var latestCheckVal: Long = 0L,
     var showStats: Boolean = true,
     var showGoalProgress: Boolean = true,

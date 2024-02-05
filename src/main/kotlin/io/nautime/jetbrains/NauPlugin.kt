@@ -1,5 +1,6 @@
 package io.nautime.jetbrains
 
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationNamesInfo
@@ -7,6 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.SystemInfo
@@ -86,6 +88,10 @@ class NauPlugin() : Disposable {
             log.info("Not linked.")
             notificationService.showGoToLinkNotif()
         }
+
+        getState().latestCliVer = MIN_CLI_VERSION
+
+        addInitEvent()
     }
 
     private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 1, JOB_PERIOD_SEC, SECONDS)
@@ -193,8 +199,21 @@ class NauPlugin() : Disposable {
                 params = params
             )
         )
+    }
 
-
+    private fun addInitEvent() {
+        addEvent(
+            type = EventType.PLUGIN_INFO,
+            project = null,
+            document = null,
+            params = mapOf(
+                "pluginVersion" to getPluginVersion(),
+                "osName" to osName,
+                "deviceName" to systemName,
+                "ideType" to ideType,
+                "ideVersion" to ideVersion,
+            )
+        )
     }
 
     private var lastEvent: EventDto = EventDto(type = EventType.ACTION, target = "<empty>", project = null, projectBaseDir = null, branch = null, language = null)
@@ -333,18 +352,6 @@ class NauPlugin() : Disposable {
             return@executeSend true
         }
 
-        /**
-         *
-         *                 pluginVersion = "1.0.0", // todo add to params
-         *                 cliType = "todo",
-         *                 cliVersion = "todo",
-         *
-         *                 osName = osName,
-         *                 deviceName = systemName,
-         *                 ideType = ideType,
-         *                 ideVersion = ideVersion,
-         */
-
         val sendRequest = SendEventsRequest(
             events = eventsToSend
         )
@@ -386,9 +393,9 @@ class NauPlugin() : Disposable {
 
     fun getPluginId(): String = pluginState.pluginId
 
-    fun getPluginLinkUrl(): String = "https://nautime.io/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
+    fun getPluginLinkUrl(): String = "$SERVER_ADDRESS/link/${getPluginId()}?utm_source=plugin-jetbrains&utm_content=plugin_link"
 
-    fun getDashboardUrl(): String = "https://nautime.io/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
+    fun getDashboardUrl(): String = "$SERVER_ADDRESS/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
 
     fun getNotificationService(): NotificationService = notificationService
 
@@ -428,7 +435,12 @@ class NauPlugin() : Disposable {
     }
 
     companion object {
-        val log = Logger.getInstance("nautime.io")
+        const val PLUGIN_ID = "nautime.io"
+        const val MIN_CLI_VERSION = "v1.0.4"
+
+        val log = Logger.getInstance(PLUGIN_ID)
         val json = Json { ignoreUnknownKeys = true }
+
+        fun getPluginVersion(): String = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version ?: "0.0.0"
     }
 }

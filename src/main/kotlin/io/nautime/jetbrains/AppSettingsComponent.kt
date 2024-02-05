@@ -23,7 +23,7 @@ class AppSettingsComponent {
         if (nauPlugin == null) {
             formBuilder.addLabeledComponent(
                 Label("Visit"),
-                Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") }
+                Link("Nau dashboard") { BrowserUtil.browse("$SERVER_ADDRESS/dashboard") }
             )
         } else {
             val pluginState = nauPlugin.getState()
@@ -31,7 +31,7 @@ class AppSettingsComponent {
             if (pluginState.isLinked) {
                 formBuilder.addLabeledComponent(
                     Label("Plugin is linked. You can explore your working activity on"),
-                    Link("Nau dashboard") { BrowserUtil.browse("https://nautime.io/dashboard") }
+                    Link("Nau dashboard") { BrowserUtil.browse("$SERVER_ADDRESS/dashboard") }
                 )
 
                 formBuilder.addComponent(JPanel(FlowLayout(FlowLayout.LEFT)).apply {

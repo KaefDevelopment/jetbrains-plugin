@@ -1,7 +1,5 @@
 package io.nautime.jetbrains.senders
 
-import com.intellij.ide.plugins.PluginManagerCore
-import com.intellij.openapi.extensions.PluginId
 import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.model.PluginStatusResponse
@@ -29,7 +27,7 @@ class HttpSender(
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-type", "application/json")
         httpPost.setHeader("Authorization", nauPlugin.getPluginId())
-        httpPost.setHeader("X-Version", PluginManagerCore.getPlugin(PluginId.getId("nautime.io"))?.version ?: "0.0.0")
+        httpPost.setHeader("X-Version", NauPlugin.getPluginVersion())
 
         httpClient.execute(httpPost).use { response ->
             val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
@@ -55,7 +53,7 @@ class HttpSender(
         httpPost.setHeader("Authorization", nauPlugin.getPluginId())
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-type", "application/json")
-        httpPost.setHeader("X-Version", PluginManagerCore.getPlugin(PluginId.getId("nautime.io"))?.version ?: "0.0.0")
+        httpPost.setHeader("X-Version", NauPlugin.getPluginVersion())
         httpPost.entity = entity
 
         // todo send information about status bar hide

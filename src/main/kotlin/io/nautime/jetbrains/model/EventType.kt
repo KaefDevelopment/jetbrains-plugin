@@ -4,9 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class EventType {
-//    APP_INIT,
+    PLUGIN_INFO,
 
-//    PROJECT_OPEN,
     DOCUMENT_OPEN,
     DOCUMENT_CHANGE,
     DOCUMENT_FOCUS,

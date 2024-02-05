@@ -79,7 +79,7 @@ class NotificationService(
 
 
     companion object {
-        private val GROUP = NotificationGroupManager.getInstance().getNotificationGroup("nautime.io")
+        private val GROUP = NotificationGroupManager.getInstance().getNotificationGroup(NauPlugin.PLUGIN_ID)
     }
 
 

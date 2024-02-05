@@ -31,13 +31,18 @@ class CliExecutor(
         }
 
         try {
-
             val path = CliHolder.CLI_FILE.absolutePath
             val cmds = "$path event -d events:${eventsRequest.events.size} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
 
             NauPlugin.log.info("Execute cli with cmds $cmds")
 
-            val pb = ProcessBuilder(path, "event", "-d", formatJson(json), "-k", nauPlugin.getPluginId(), "-s", "$SERVER_ADDRESS/api/plugin/v1/events")
+            val pb = ProcessBuilder(
+                path, "event",
+                "-d", formatJson(json),
+                "-k", nauPlugin.getPluginId(),
+                "-s", "$SERVER_ADDRESS/api/plugin/v1/events",
+                "-a", "${nauPlugin.getState().isLinked}"
+            )
             val proc = pb.start()
 
             try {

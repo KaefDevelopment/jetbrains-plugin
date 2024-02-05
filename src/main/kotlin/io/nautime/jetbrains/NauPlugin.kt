@@ -51,7 +51,7 @@ class NauPlugin() : Disposable {
 
     private val osName: String
     private val systemName: String
-    private val ideType: String
+    val ideType: String
     private val ideVersion: String
     private val eventQueue: Queue<EventDto>
 

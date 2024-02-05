@@ -86,7 +86,8 @@ class CliHolder {
                     BASE_DIR.mkdir()
                 }
 
-                val zipFile = File(BASE_DIR, "$CLI_NAME.zip") // todo add ide type?
+                val ideType = nauPlugin.ideType.lowercase().replace(" ", "_")
+                val zipFile = File(BASE_DIR, "${CLI_NAME}_$ideType.zip")
                 val githubUrl = URL(getGithubCliUrl(nauPlugin))
 
                 NauPlugin.log.info("Download zip $githubUrl")

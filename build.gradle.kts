@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "nautime.io"
-version = "1.2.0"
+version = "1.2.3"
 
 repositories {
     mavenCentral()

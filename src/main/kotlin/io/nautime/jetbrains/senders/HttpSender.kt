@@ -7,7 +7,6 @@ import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.model.PluginStatusResponse
 import io.nautime.jetbrains.model.SendEventsRequest
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -19,7 +18,7 @@ class HttpSender(
     val httpClient = HttpClients.createDefault()
 
     fun send(eventsRequest: SendEventsRequest): Boolean {
-        val json = Json.encodeToString(eventsRequest)
+        val json = NauPlugin.json.encodeToString(eventsRequest)
 
         NauPlugin.log.info("[HTTP] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
 
@@ -69,7 +68,7 @@ class HttpSender(
                 return PluginStatusResponse.default(nauPlugin)
             }
 
-            return Json.decodeFromString<PluginStatusResponse>(responseBody)
+            return NauPlugin.json.decodeFromString<PluginStatusResponse>(responseBody)
         }
     }
 

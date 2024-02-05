@@ -8,11 +8,11 @@ import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.utils.OsHelper
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 class CliExecutor(
@@ -20,7 +20,7 @@ class CliExecutor(
 ) {
 
     fun send(eventsRequest: SendEventsRequest): Boolean {
-        val json = Json.encodeToString(eventsRequest)
+        val json = NauPlugin.json.encodeToString(eventsRequest)
 
         NauPlugin.log.info("[Cli] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
 
@@ -56,12 +56,16 @@ class CliExecutor(
 
             val stdout = BufferedReader(InputStreamReader(proc.inputStream))
             val stderr = BufferedReader(InputStreamReader(proc.errorStream))
-            proc.waitFor()
+            val procResult = proc.waitFor(60, TimeUnit.SECONDS)
+            if (!procResult) {
+                NauPlugin.log.warn("[Cli] Events sent error timeout")
+                return false
+            }
 
             val stdoutStr = stdout.lines().collect(Collectors.joining())
             if (stdoutStr.isNotBlank()) {
                 NauPlugin.log.info("[Cli] Events sent out $stdoutStr")
-                val response: StatusResponse = Json.decodeFromString(stdoutStr)
+                val response: StatusResponse = NauPlugin.json.decodeFromString(stdoutStr)
                 if (response.status) NauPlugin.log.info("[Cli] Events sent")
                 return response.status
             }

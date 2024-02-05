@@ -70,7 +70,7 @@ class NauStatusBarPanel(val project: Project) : CustomStatusBarWidget, Activatab
 
     override fun showNotify() {
         updateFuture = EdtExecutorService.getScheduledExecutorInstance().scheduleWithFixedDelay(
-            { widget.get().updateState() }, 1, 10, TimeUnit.SECONDS
+            { widget.get().updateState() }, 0, 10, TimeUnit.SECONDS
         )
     }
 
@@ -107,7 +107,7 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
         this.isFocusable = false
         this.setTextAlignment(0f)
         this.updateUI()
-        UiNotifyConnector.installOn(this, widget)
+        UiNotifyConnector(this, widget)
     }
 
     private fun showPopup(nauPlugin: NauPlugin, e: MouseEvent) {

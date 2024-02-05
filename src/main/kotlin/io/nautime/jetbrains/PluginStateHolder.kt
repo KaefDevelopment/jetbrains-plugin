@@ -33,7 +33,7 @@ data class PluginState(
     var isCliReady: Boolean = false,
     var needCliUpdate: Boolean = false,
     var currentCliVer: String = "",
-    var latestCliVer: String = "v1.0.3",
+    var latestCliVer: String = "v1.0.4",
     var latestCheckVal: Long = 0L,
     var showStats: Boolean = true,
     var showGoalProgress: Boolean = true,

@@ -26,6 +26,7 @@ import io.nautime.jetbrains.utils.IdeUtils
 import io.nautime.jetbrains.utils.getCurrentFile
 import io.nautime.jetbrains.utils.getFile
 import io.nautime.jetbrains.utils.orLast
+import kotlinx.serialization.json.Json
 import java.net.InetAddress
 import java.time.Duration
 import java.time.Instant
@@ -283,7 +284,7 @@ class NauPlugin() : Disposable {
 
 
     private fun check() = executeSend {
-        if (pluginState.isLinked && !IdeUtils.isIdeInFocus()) return@executeSend
+//        if (pluginState.isLinked && !IdeUtils.isIdeInFocus()) return@executeSend
 
         try {
             val statusResponse = try {
@@ -428,5 +429,6 @@ class NauPlugin() : Disposable {
 
     companion object {
         val log = Logger.getInstance("nautime.io")
+        val json = Json { ignoreUnknownKeys = true }
     }
 }

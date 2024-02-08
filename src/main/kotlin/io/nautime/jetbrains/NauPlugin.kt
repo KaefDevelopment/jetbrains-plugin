@@ -346,8 +346,7 @@ class NauPlugin() : Disposable {
             return@executeSend true
         }
 
-        // todo create view of queue
-        val eventsToSend = eventQueue.toList()
+        val eventsToSend = QueueView(eventQueue, SEND_BATCH_SIZE)
         if (eventsToSend.isEmpty()) {
             return@executeSend true
         }
@@ -434,9 +433,41 @@ class NauPlugin() : Disposable {
         return "${hours}h ${mins}m"
     }
 
+    class QueueView<T>(
+        private val queue: Queue<T>,
+        sizeLimit: Int = Int.MAX_VALUE,
+    ) : Collection<T> {
+        override val size: Int = when {
+            queue.size < sizeLimit -> queue.size
+            else -> sizeLimit
+        }
+
+        override fun isEmpty(): Boolean = size == 0
+
+        override fun iterator(): Iterator<T> {
+            val iterator = queue.iterator()
+
+            return object : Iterator<T> {
+                var i = 0
+
+                override fun hasNext(): Boolean = i < size
+
+                override fun next(): T {
+                    i++
+                    return iterator.next()
+                }
+            }
+        }
+
+        override fun containsAll(elements: Collection<T>): Boolean = throw NotImplementedError()
+        override fun contains(element: T): Boolean = throw NotImplementedError()
+    }
+
     companion object {
         const val PLUGIN_ID = "nautime.io"
         const val MIN_CLI_VERSION = "v1.0.4"
+
+        const val SEND_BATCH_SIZE = 100
 
         val log = Logger.getInstance(PLUGIN_ID)
         val json = Json { ignoreUnknownKeys = true }

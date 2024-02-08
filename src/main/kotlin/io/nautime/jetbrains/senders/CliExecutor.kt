@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.util.concurrent.TimeUnit
@@ -48,13 +49,13 @@ class CliExecutor(
 
             try {
                 val stdin = BufferedWriter(OutputStreamWriter(proc.outputStream))
-                stdin.write(json)
-                stdin.write("\n")
-//                try {
-                stdin.flush()
-                stdin.close()
-//                } catch (e: IOException) {
-//                }
+                try {
+                    stdin.write(json)
+                    stdin.write("\n")
+                    stdin.flush()
+                    stdin.close()
+                } catch (_: IOException) {
+                }
             } catch (e: Exception) {
                 NauPlugin.log.warn("[Cli] Events sent error", e)
                 return false
@@ -62,7 +63,7 @@ class CliExecutor(
 
             val stdout = BufferedReader(InputStreamReader(proc.inputStream))
             val stderr = BufferedReader(InputStreamReader(proc.errorStream))
-            val procResult = proc.waitFor(60, TimeUnit.SECONDS)
+            val procResult = proc.waitFor(30, TimeUnit.SECONDS)
             if (!procResult) {
                 NauPlugin.log.warn("[Cli] Events sent error timeout")
                 return false

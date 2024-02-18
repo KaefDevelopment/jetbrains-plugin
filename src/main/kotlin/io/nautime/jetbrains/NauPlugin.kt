@@ -49,10 +49,6 @@ class NauPlugin() : Disposable {
     private val httpSender = HttpSender(this)
     private val cliExecutor = CliExecutor(this)
 
-    private val osName: String
-    private val systemName: String
-    val ideType: String
-    private val ideVersion: String
     private val eventQueue: Queue<EventDto>
 
     private var pluginState: PluginState
@@ -62,15 +58,9 @@ class NauPlugin() : Disposable {
     //        private lateinit var fileDb: FileDb
     private var stats: Stats? = null
 
-
     init {
         log.info("Initialize plugin! project: ")
-        ideType = ApplicationNamesInfo.getInstance().productName
-        ideVersion = ApplicationInfo.getInstance().fullVersion
-        log.info("IDE type: $ideType IDE version: $ideVersion")
         eventQueue = ConcurrentLinkedQueue()
-        osName = SystemInfo.getOsNameAndVersion()
-        systemName = InetAddress.getLocalHost().hostName
 
         pluginStateHolder = service<PluginStateHolder>()
         pluginState = pluginStateHolder.pluginState
@@ -174,7 +164,7 @@ class NauPlugin() : Disposable {
     fun init() {
 //        if (isInit()) return
 
-        log.info("Init NAU plugin. IDE type: $ideType IDE version: $ideVersion State: $pluginState")
+        log.info("Init NAU plugin. State: $pluginState")
     }
 
     fun addEventProject(type: EventType, project: Project? = null, params: EventParamsMap = emptyMap()) {
@@ -202,18 +192,31 @@ class NauPlugin() : Disposable {
     }
 
     private fun addInitEvent() {
-        addEvent(
-            type = EventType.PLUGIN_INFO,
-            project = null,
-            document = null,
-            params = mapOf(
-                "pluginVersion" to getPluginVersion(),
-                "osName" to osName,
-                "deviceName" to systemName,
-                "ideType" to ideType,
-                "ideVersion" to ideVersion,
+        addToQueue(
+            EventDto(
+                type = EventType.PLUGIN_INFO,
+                project = null,
+                branch = null,
+                target = null,
+                language = null,
+                params = mapOf(
+                    "pluginVersion" to getPluginVersion(),
+                    "osName" to getOsName(),
+                    "deviceName" to InetAddress.getLocalHost().hostName,
+                    "ideType" to ApplicationNamesInfo.getInstance().productName,
+                    "ideVersion" to ApplicationInfo.getInstance().fullVersion,
+                )
             )
         )
+    }
+
+    private fun getOsName(): String {
+        return when {
+            SystemInfo.isMac -> "MAC"
+            SystemInfo.isWindows -> "WIN"
+            SystemInfo.isLinux -> "LINUX"
+            else -> "OTHER"
+        }
     }
 
     private var lastEvent: EventDto = EventDto(type = EventType.ACTION, target = "<empty>", project = null, projectBaseDir = null, branch = null, language = null)
@@ -222,6 +225,7 @@ class NauPlugin() : Disposable {
     private var count: Int = 1
     private var keys: Int = 1
 
+    // todo check concurrent
     fun addEvent(event: EventDto?) {
         if (event?.project == null) return
 
@@ -301,7 +305,7 @@ class NauPlugin() : Disposable {
         }
     }
 
-
+    // todo add debounce for unfocused
     private fun check() = executeSend {
 //        if (pluginState.isLinked && !IdeUtils.isIdeInFocus()) return@executeSend
 

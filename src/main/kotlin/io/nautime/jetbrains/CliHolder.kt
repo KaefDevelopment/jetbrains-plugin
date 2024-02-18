@@ -1,5 +1,6 @@
 package io.nautime.jetbrains
 
+import com.intellij.openapi.application.ApplicationNamesInfo
 import io.nautime.jetbrains.utils.OsHelper
 import io.nautime.jetbrains.utils.OsHelper.Companion.getSystemEnv
 import io.nautime.jetbrains.utils.OsHelper.Companion.isWindows
@@ -86,7 +87,7 @@ class CliHolder {
                     BASE_DIR.mkdir()
                 }
 
-                val ideType = nauPlugin.ideType.lowercase().replace(" ", "_")
+                val ideType = ApplicationNamesInfo.getInstance().productName.lowercase().replace(" ", "_")
                 val zipFile = File(BASE_DIR, "${CLI_NAME}_$ideType.zip")
                 val githubUrl = URL(getGithubCliUrl(nauPlugin))
 

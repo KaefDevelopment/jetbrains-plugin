@@ -1,6 +1,7 @@
 package io.nautime.jetbrains.senders
 
 import io.nautime.jetbrains.NauPlugin
+import io.nautime.jetbrains.NauPlugin.Companion.PLUGIN_TYPE
 import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.model.PluginStatusResponse
 import org.apache.http.client.methods.HttpPost
@@ -24,7 +25,7 @@ class HttpSender(
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-type", "application/json")
         httpPost.setHeader("X-Version", NauPlugin.getPluginVersion())
-        httpPost.setHeader("X-Source", "jetbrains")
+        httpPost.setHeader("X-Source", PLUGIN_TYPE)
         httpPost.entity = entity
 
         // todo send information about status bar hide

@@ -54,7 +54,8 @@ class CliExecutor(
                     stdin.write("\n")
                     stdin.flush()
                     stdin.close()
-                } catch (_: IOException) {
+                } catch (e: IOException) {
+                    NauPlugin.log.warn("[Cli] Events sent error ${e.message}")
                 }
             } catch (e: Exception) {
                 NauPlugin.log.warn("[Cli] Events sent error", e)

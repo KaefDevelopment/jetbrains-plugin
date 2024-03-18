@@ -200,6 +200,7 @@ class NauPlugin() : Disposable {
                 target = null,
                 language = null,
                 params = mapOf(
+                    "pluginType" to PLUGIN_TYPE,
                     "pluginVersion" to getPluginVersion(),
                     "osName" to getOsName(),
                     "deviceName" to InetAddress.getLocalHost().hostName,
@@ -318,7 +319,7 @@ class NauPlugin() : Disposable {
                 updateStatusBar()
                 response
             } catch (ex: Exception) {
-                log.info("Error during get status request", ex)
+                log.info("Error during get status request: ${ex.message}")
                 PluginStatusResponse.default(this)
             }
 
@@ -469,6 +470,7 @@ class NauPlugin() : Disposable {
 
     companion object {
         const val PLUGIN_ID = "nautime.io"
+        const val PLUGIN_TYPE = "jetbrains"
         const val MIN_CLI_VERSION = "v1.0.4"
 
         const val SEND_BATCH_SIZE = 100

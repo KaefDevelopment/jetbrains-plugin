@@ -1,11 +1,11 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.21"
-    id("org.jetbrains.intellij") version "1.17.0"
-    kotlin("plugin.serialization") version "1.9.21"
+    id("org.jetbrains.kotlin.jvm") version "1.9.23"
+    id("org.jetbrains.intellij") version "1.17.2"
+    kotlin("plugin.serialization") version "1.9.23"
 }
 
 group = "nautime.io"
-version = "1.2.8"
+version = "1.2.9"
 
 repositories {
     mavenCentral()
@@ -33,7 +33,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("222")
-        untilBuild.set("233.*")
+        untilBuild.set("241.*")
     }
 
     signPlugin {

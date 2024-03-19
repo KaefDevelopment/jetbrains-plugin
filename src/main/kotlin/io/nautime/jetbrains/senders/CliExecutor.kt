@@ -20,7 +20,7 @@ class CliExecutor(
     private val nauPlugin: NauPlugin,
 ) {
 
-    fun send(eventsRequest: SendEventsRequest): Boolean {
+    fun send(eventsRequest: SendEventsRequest, send: Boolean): Boolean {
         val json = NauPlugin.json.encodeToString(eventsRequest)
 
         NauPlugin.log.info("[Cli] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
@@ -34,7 +34,7 @@ class CliExecutor(
         try {
             val path = CliHolder.CLI_FILE.absolutePath
             val cmds =
-                "$path event -a=${nauPlugin.getState().isLinked} -d events:${eventsRequest.events.size} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
+                "$path event -a=${nauPlugin.getState().isLinked && send} -d events:${eventsRequest.events.size} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
 
             NauPlugin.log.info("Execute cli with cmds $cmds")
 
@@ -62,9 +62,11 @@ class CliExecutor(
                 return false
             }
 
+            val waitForProcSec = if (send) 30L else 1L // don't wait during dispose for example
+
             val stdout = BufferedReader(InputStreamReader(proc.inputStream))
             val stderr = BufferedReader(InputStreamReader(proc.errorStream))
-            val procResult = proc.waitFor(30, TimeUnit.SECONDS)
+            val procResult = proc.waitFor(waitForProcSec, TimeUnit.SECONDS)
             if (!procResult) {
                 NauPlugin.log.warn("[Cli] Events sent error timeout")
                 return false

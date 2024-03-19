@@ -109,7 +109,7 @@ class NauPlugin() : Disposable {
             }
 
             if (pluginState.isCliReady) {
-                sendByCli()
+                sendByCli(send = true)
             }
 
             updateStatusBar()
@@ -366,10 +366,10 @@ class NauPlugin() : Disposable {
         return@executeSend isSuccess
     }
 
-    private fun sendByCli(): Boolean {
+    private fun sendByCli(send: Boolean): Boolean {
         return try {
             baseSend { sendRequest ->
-                cliExecutor.send(sendRequest)
+                cliExecutor.send(sendRequest, send)
             }
         } catch (ex: Exception) {
             log.info("Send by cli error", ex)
@@ -386,9 +386,9 @@ class NauPlugin() : Disposable {
 
 
     override fun dispose() {
-        sendByCli()
-        httpSender.httpClient.close()
         mainJobFuture.cancel(false)
+        sendByCli(send = false)
+        httpSender.httpClient.close()
     }
 
     fun getState(): PluginState = pluginState

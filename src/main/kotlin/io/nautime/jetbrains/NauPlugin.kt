@@ -388,7 +388,7 @@ class NauPlugin() : Disposable {
     override fun dispose() {
         mainJobFuture.cancel(false)
         sendByCli(send = false)
-        httpSender.httpClient.close()
+        httpSender.close()
     }
 
     fun getState(): PluginState = pluginState

@@ -4,16 +4,24 @@ import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.NauPlugin.Companion.PLUGIN_TYPE
 import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.model.PluginStatusResponse
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import java.nio.charset.Charset
 
+
 class HttpSender(
     private val nauPlugin: NauPlugin,
 ) {
-    val httpClient: CloseableHttpClient = HttpClients.createDefault()
+    private val httpClient: CloseableHttpClient = HttpClients.createDefault()
+
+    private var requestConfig: RequestConfig = RequestConfig.custom()
+        .setConnectionRequestTimeout(30 * 1000)
+        .setConnectTimeout(30 * 1000)
+        .setSocketTimeout(30 * 1000)
+        .build()
 
     fun getStatus(pluginId: String): PluginStatusResponse {
         NauPlugin.log.info("Get status $pluginId")
@@ -21,6 +29,7 @@ class HttpSender(
         val entity = StringEntity("{}")
 
         val httpPost = HttpPost("$SERVER_ADDRESS/api/web/v1/user/plugin/status2")
+        httpPost.config = requestConfig
         httpPost.setHeader("Authorization", nauPlugin.getPluginId())
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-type", "application/json")
@@ -40,6 +49,10 @@ class HttpSender(
 
             return NauPlugin.json.decodeFromString<PluginStatusResponse>(responseBody)
         }
+    }
+
+    fun close() {
+        httpClient.close()
     }
 
 

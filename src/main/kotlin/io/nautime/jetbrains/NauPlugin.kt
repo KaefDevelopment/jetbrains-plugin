@@ -471,9 +471,9 @@ class NauPlugin() : Disposable {
     companion object {
         const val PLUGIN_ID = "nautime.io"
         const val PLUGIN_TYPE = "jetbrains"
-        const val MIN_CLI_VERSION = "v1.0.4"
+        const val MIN_CLI_VERSION = "v1.0.6"
 
-        const val SEND_BATCH_SIZE = 100
+        const val SEND_BATCH_SIZE = 50
 
         val log = Logger.getInstance(PLUGIN_ID)
         val json = Json { ignoreUnknownKeys = true }

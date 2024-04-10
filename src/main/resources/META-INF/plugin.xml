@@ -16,6 +16,13 @@
         <li>Enjoy your coding stats</li>
       </ul>
       <br/>
+      <br/>
+      <b>Security</b>
+      <br/>
+      We do not store, transfer, or have access to your code. All collected statistics are private and available only to you
+      <br/>
+      Nau Time plugin is open source and transparent
+      <br/>
     ]]>
     </description>
     <vendor email="alex@nautime.io" url="https://www.nautime.io">nautime.io</vendor>
@@ -63,9 +70,14 @@
 
     <change-notes>
         <![CDATA[
+        1.2.12
+        <br />
+        Stability fixes
+        <br />
         1.2.9
         <br />
         2024.1 compatibility
+        <br />
         1.2.8
         <br />
         Minor fixes

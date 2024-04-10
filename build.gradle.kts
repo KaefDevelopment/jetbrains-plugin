@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "nautime.io"
-version = "1.2.12"
+version = "1.2.13"
 
 repositories {
     mavenCentral()
@@ -33,7 +33,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("222")
-        untilBuild.set("241.*")
+        untilBuild.set("242.*")
     }
 
     signPlugin {

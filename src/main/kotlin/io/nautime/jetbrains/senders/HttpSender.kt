@@ -18,9 +18,9 @@ class HttpSender(
     private val httpClient: CloseableHttpClient = HttpClients.createDefault()
 
     private var requestConfig: RequestConfig = RequestConfig.custom()
-        .setConnectionRequestTimeout(30 * 1000)
-        .setConnectTimeout(30 * 1000)
-        .setSocketTimeout(30 * 1000)
+        .setConnectionRequestTimeout(CONNECTION_TIMEOUT_MS)
+        .setConnectTimeout(CONNECTION_TIMEOUT_MS)
+        .setSocketTimeout(CONNECTION_TIMEOUT_MS)
         .build()
 
     fun getStatus(pluginId: String): PluginStatusResponse {
@@ -56,4 +56,7 @@ class HttpSender(
     }
 
 
+    companion object {
+        const val CONNECTION_TIMEOUT_MS = 30 * 1000
+    }
 }

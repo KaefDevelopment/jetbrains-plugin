@@ -59,7 +59,7 @@ class NauPlugin() : Disposable {
     private var stats: Stats? = null
 
     init {
-        log.info("Initialize plugin! project: ")
+         log.info("Initialize plugin! Version: ${getPluginVersion()}")
         eventQueue = ConcurrentLinkedQueue()
 
         pluginStateHolder = service<PluginStateHolder>()

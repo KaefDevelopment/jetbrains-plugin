@@ -107,7 +107,7 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
         this.isFocusable = false
         this.setTextAlignment(0f)
         this.updateUI()
-        UiNotifyConnector.installOn(this, widget)
+        UiNotifyConnector(this, widget)
     }
 
     private fun showPopup(nauPlugin: NauPlugin, e: MouseEvent) {

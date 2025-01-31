@@ -21,6 +21,7 @@ import io.nautime.jetbrains.model.EventType
 import io.nautime.jetbrains.model.PluginStatusResponse
 import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.model.Stats
+import io.nautime.jetbrains.model.TooltipData
 import io.nautime.jetbrains.senders.CliExecutor
 import io.nautime.jetbrains.senders.HttpSender
 import io.nautime.jetbrains.statusbar.NauStatusBarFactory
@@ -57,6 +58,7 @@ class NauPlugin() : Disposable {
 
     //        private lateinit var fileDb: FileDb
     private var stats: Stats? = null
+    private var tooltipData: TooltipData? = null
 
     init {
          log.info("Initialize plugin! Version: ${getPluginVersion()}")
@@ -315,6 +317,7 @@ class NauPlugin() : Disposable {
                 val response = httpSender.getStatus(getPluginId())
                 pluginState.tryUpdateCliVersion(response.cliVersion)
                 stats = response.stats
+                tooltipData = response.tooltip
                 pluginState.latestCheck = Instant.now()
                 updateStatusBar()
                 response
@@ -414,19 +417,13 @@ class NauPlugin() : Disposable {
         return " ${duration.toToTimeStr()}"
     }
 
-    fun getStatusBarTitle(): String {
-        if (!getState().isLinked) return "Click on the bar and link plugin"
-        val curStats = stats ?: return "Nau"
+    fun getStatusBarTooltipText(): String {
+        if (!getState().isLinked) return "Click on the icon and link plugin"
         if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10)
-            return "Nau work in offline mode. All your stats will be saved"
+            return "Nautime work in offline mode. All your stats will be saved"
 
-        return "<table>" +
-                "<tr><td>Total time:</td><td align=right>${Duration.ofSeconds(curStats.total).toToTimeStr()}</td></tr>" +
-                (curStats.goal?.let { goalStats ->
-                    "<tr><td>Goal progress:</td><td align=right>${goalStats.percent}% of ${Duration.ofSeconds(goalStats.duration).toToTimeStr()}</td></tr>"
-                } ?: "") +
-                "<tr><td colspan=\"2\">Find additional statistics on the web dashboard</td></tr>" +
-                "</table>"
+        val tooltip = tooltipData ?: TooltipData("Nau")
+        return tooltip.html
     }
 
     fun Duration.toToTimeStr(): String {

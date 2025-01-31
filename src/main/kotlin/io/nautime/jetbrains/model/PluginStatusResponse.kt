@@ -9,6 +9,7 @@ data class PluginStatusResponse(
     val auth: Boolean,
     val cliVersion: String,
     val stats: Stats,
+    val tooltip: TooltipData,
     val notificationList: List<Notif>,
 ) {
     companion object {
@@ -16,6 +17,7 @@ data class PluginStatusResponse(
             auth = nauPlugin.getState().isLinked,
             cliVersion = nauPlugin.getState().currentCliVer,
             stats = Stats(0, null),
+            tooltip = TooltipData("Nau"),
             notificationList = emptyList()
         )
     }
@@ -26,6 +28,11 @@ data class PluginStatusResponse(
 data class Stats(
     val total: Long,
     val goal: GoalStats?,
+)
+
+@Serializable
+data class TooltipData(
+    val html: String,
 )
 
 @Serializable

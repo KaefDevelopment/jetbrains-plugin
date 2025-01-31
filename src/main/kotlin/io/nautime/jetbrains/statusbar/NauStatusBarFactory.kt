@@ -107,13 +107,13 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
         this.isFocusable = false
         this.setTextAlignment(0f)
         this.updateUI()
-        UiNotifyConnector(this, widget)
+        UiNotifyConnector.installOn(this, widget)
     }
 
     private fun showPopup(nauPlugin: NauPlugin, e: MouseEvent) {
         val context = DataManager.getInstance().getDataContext(this)
 
-        val popup = createPopup(nauPlugin, context) ?: return
+        val popup = createPopup(nauPlugin, context)
         val dimension = popup.content.preferredSize
         val at = Point(-dimension.width / 2, -dimension.height)
         popup.show(RelativePoint(e.component, at))
@@ -121,7 +121,7 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
         Disposer.tryRegister(widget, popup) // destroy popup on unexpected project close
     }
 
-    private fun createPopup(nauPlugin: NauPlugin, context: DataContext): ListPopup? {
+    private fun createPopup(nauPlugin: NauPlugin, context: DataContext): ListPopup {
         val popupGroup = DefaultActionGroup()
 
         if (nauPlugin.getState().isLinked) {
@@ -213,7 +213,7 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
         if (!this.isShowing) return
 
         text = statusBarText
-        toolTipText = nauPlugin.getStatusBarTitle()
+        toolTipText = nauPlugin.getStatusBarTooltipText()
         icon = getIcon(ICON_PATH, NauStatsPanel::class.java.classLoader)
     }
 

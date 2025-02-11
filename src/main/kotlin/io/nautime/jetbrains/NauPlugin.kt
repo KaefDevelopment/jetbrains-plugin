@@ -124,6 +124,7 @@ class NauPlugin() : Disposable {
 
     fun checkLink() {
         AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 5, SECONDS)
+        AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 10, SECONDS)
         AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 15, SECONDS)
         AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 30, SECONDS)
         AppExecutorUtil.getAppScheduledExecutorService().schedule({ if (!getState().isLinked) mainJob() }, 45, SECONDS)

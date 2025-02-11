@@ -17,7 +17,7 @@ class NotificationService(
 
     fun showGoToLinkNotif() {
         val notification: Notification = GROUP.createNotification(
-            "Welcome to Nau Time Tracker",
+            "Welcome to NauTime Tracker",
             "Follow the link below to start using the plugin.",
             NotificationType.INFORMATION
         )
@@ -42,7 +42,7 @@ class NotificationService(
     fun showLinkIsDoneNotif() {
         val notification: Notification = GROUP.createNotification(
             "Congrats!",
-            "You are linked to Nau Time",
+            "You are linked to NauTime",
             NotificationType.INFORMATION
         )
             .setImportant(true)

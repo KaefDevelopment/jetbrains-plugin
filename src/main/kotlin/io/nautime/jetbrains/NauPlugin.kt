@@ -34,6 +34,7 @@ import java.net.InetAddress
 import java.time.Duration
 import java.time.Instant
 import java.util.Queue
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
@@ -133,7 +134,7 @@ class NauPlugin() : Disposable {
     private fun checkCliExist(): Boolean {
         if (CliHolder.isCliReady()) return true
         pluginState.isCliReady = false
-        getState().needCliUpdate = true
+        pluginState.needCliUpdate = true
         log.info("Cli not found")
         return false
     }
@@ -406,6 +407,15 @@ class NauPlugin() : Disposable {
     fun getDashboardUrl(): String = "$SERVER_ADDRESS/dashboard?utm_source=plugin-jetbrains&utm_content=status_bar"
 
     fun getNotificationService(): NotificationService = notificationService
+
+    fun unlink() {
+        pluginState.pluginId = UUID.randomUUID().toString()
+        pluginState.isLinked = false
+        stats = null
+        tooltipData = null
+        updateStatusBar()
+        notificationService.showGoToLinkNotif()
+    }
 
     fun getStatusBarText(): String {
         if(!getState().isLinked) return "Nau"

@@ -3,6 +3,7 @@ package io.nautime.jetbrains.senders
 import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.NauPlugin.Companion.PLUGIN_TYPE
 import io.nautime.jetbrains.SERVER_ADDRESS
+import io.nautime.jetbrains.maskPluginId
 import io.nautime.jetbrains.model.PluginStatusResponse
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpPost
@@ -24,7 +25,7 @@ class HttpSender(
         .build()
 
     fun getStatus(pluginId: String): PluginStatusResponse {
-        NauPlugin.log.info("Get status $pluginId")
+        NauPlugin.log.info("Get status ${pluginId.maskPluginId()}")
 
         val entity = StringEntity("{}")
 
@@ -41,13 +42,14 @@ class HttpSender(
 
         httpClient.execute(httpPost).use { response ->
             val responseBody = response.entity.content.readBytes().toString(Charset.defaultCharset())
-            NauPlugin.log.info("Get status response: ${response.statusLine.statusCode} $responseBody")
+            val statusResponse = NauPlugin.json.decodeFromString<PluginStatusResponse>(responseBody)
+            NauPlugin.log.info("Get status response: ${response.statusLine.statusCode} $statusResponse")
             if (response.statusLine.statusCode != 200) {
                 // todo rewrite it
                 return PluginStatusResponse.default(nauPlugin)
             }
 
-            return NauPlugin.json.decodeFromString<PluginStatusResponse>(responseBody)
+            return statusResponse
         }
     }
 

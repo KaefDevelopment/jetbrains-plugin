@@ -7,7 +7,7 @@ plugins {
 // todo https://blog.jetbrains.com/platform/2024/07/intellij-platform-gradle-plugin-2-0/?lidx=1&wpid=497624
 
 group = "nautime.io"
-version = "1.2.20"
+version = "1.2.21"
 
 repositories {
     mavenCentral()

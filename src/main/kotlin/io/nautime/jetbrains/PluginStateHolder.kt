@@ -34,21 +34,19 @@ data class PluginState(
     var needCliUpdate: Boolean = false,
     var currentCliVer: String = "",
     var latestCliVer: String = NauPlugin.MIN_CLI_VERSION,
-    var latestCheckVal: Long = 0L,
     var showStats: Boolean = true,
     var showGoalProgress: Boolean = true,
 ) {
 
     @get:Transient
-    var latestCheck: Instant
-        set(value) {
-            latestCheckVal = value.epochSecond
-        }
-        get() = Instant.ofEpochSecond(latestCheckVal)
+    var latestCheckAt: Instant = Instant.now()
+
+    @get:Transient
+    var lastEventAt: Instant = Instant.now()
 
     fun timeToCheck(): Boolean {
         return true
-//        return latestCheck.isBefore(Instant.now().minus(2, ChronoUnit.MINUTES))
+//        return Duration.between(lastEventAt, Instant.now()).toMinutes() <= SLEEP_AFTER_DURATION_MIN
     }
 
     fun tryUpdateCliVersion(newVersion: String) {
@@ -60,6 +58,10 @@ data class PluginState(
     }
 
     fun needCliUpdate() = Version(latestCliVer) > Version(currentCliVer)
+
+    override fun toString(): String {
+        return "PluginState(pluginId='${pluginId.maskPluginId()}', isLinked=$isLinked, isCliReady=$isCliReady, needCliUpdate=$needCliUpdate, currentCliVer='$currentCliVer', latestCliVer='$latestCliVer', showStats=$showStats, showGoalProgress=$showGoalProgress, latestCheck=$latestCheckAt)"
+    }
 
 }
 

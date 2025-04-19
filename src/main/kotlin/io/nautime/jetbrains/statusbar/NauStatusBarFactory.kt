@@ -111,6 +111,11 @@ private class NauStatsPanel(private val widget: NauStatusBarPanel) : TextPanel.W
     }
 
     private fun showPopup(nauPlugin: NauPlugin, e: MouseEvent) {
+//        if(!nauPlugin.getState().isLinked) {
+//            BrowserUtil.browse(nauPlugin.getPluginLinkUrl())
+//            return
+//        }
+
         val context = DataManager.getInstance().getDataContext(this)
 
         val popup = createPopup(nauPlugin, context)

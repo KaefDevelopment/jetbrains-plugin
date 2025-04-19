@@ -8,6 +8,10 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.ex.EditorEventMulticasterEx
+import com.intellij.openapi.editor.ex.FocusChangeListener
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -40,7 +44,10 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.locks.ReentrantLock
 
+
 const val JOB_PERIOD_SEC = 60L
+const val SLEEP_AFTER_DURATION_MIN = 5L
+const val OFFLINE_MODE_DURATION_MIN = 10L
 const val MIN_DURATION_FOR_SAME_TARGET_SEC = 60L // min duration before add events for same target
 
 const val SERVER_ADDRESS = "https://nautime.io"
@@ -85,6 +92,7 @@ class NauPlugin() : Disposable {
         getState().latestCliVer = MIN_CLI_VERSION
 
         addInitEvent()
+        initFocusListener()
     }
 
     private val mainJobFuture: ScheduledFuture<*> = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay({ mainJob() }, 1, JOB_PERIOD_SEC, SECONDS)
@@ -96,6 +104,9 @@ class NauPlugin() : Disposable {
 
         try {
 //            log.info("Execute main job with state: $pluginState")
+            if (pluginState.isLinked && !IdeUtils.isIdeInFocus() && Duration.between(pluginState.lastEventAt, Instant.now()).toMinutes() > SLEEP_AFTER_DURATION_MIN) {
+                return
+            }
 
             if (!pluginState.isLinked || pluginState.timeToCheck()) {
                 check()
@@ -171,6 +182,15 @@ class NauPlugin() : Disposable {
         log.info("Init NAU plugin. State: $pluginState")
     }
 
+    fun initFocusListener() {
+        val editorEventMulticaster = EditorFactory.getInstance().eventMulticaster as EditorEventMulticasterEx
+        editorEventMulticaster.addFocusChangeListener(object : FocusChangeListener {
+            override fun focusGained(editor: Editor) {
+                pluginState.lastEventAt = Instant.now()
+            }
+        }, this)
+    }
+
     fun addEventProject(type: EventType, project: Project? = null, params: EventParamsMap = emptyMap()) {
         addEvent(type, project, null as VirtualFile?, params)
     }
@@ -193,6 +213,8 @@ class NauPlugin() : Disposable {
                 params = params
             )
         )
+
+        pluginState.lastEventAt = Instant.now()
     }
 
     private fun addInitEvent() {
@@ -310,17 +332,14 @@ class NauPlugin() : Disposable {
         }
     }
 
-    // todo add debounce for unfocused
     private fun check() = executeSend {
-//        if (pluginState.isLinked && !IdeUtils.isIdeInFocus()) return@executeSend
-
         try {
             val statusResponse = try {
                 val response = httpSender.getStatus(getPluginId())
                 pluginState.tryUpdateCliVersion(response.cliVersion)
                 stats = response.stats
                 tooltipData = response.tooltip
-                pluginState.latestCheck = Instant.now()
+                pluginState.latestCheckAt = Instant.now()
                 updateStatusBar()
                 response
             } catch (ex: Exception) {
@@ -421,7 +440,7 @@ class NauPlugin() : Disposable {
         if(!getState().isLinked) return "Nau"
         val curStats = stats ?: return "Nau"
         if (!getState().showStats) return "Nau"
-        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10) return "Nau.."
+        if (Duration.between(pluginState.latestCheckAt, Instant.now()).toMinutes() > OFFLINE_MODE_DURATION_MIN) return "Nau.."
 
         val duration = Duration.ofSeconds(curStats.total)
         if (duration.toMinutes() == 0L) return "Nau"
@@ -430,7 +449,7 @@ class NauPlugin() : Disposable {
 
     fun getStatusBarTooltipText(): String {
         if (!getState().isLinked) return "Click on the icon and link plugin"
-        if (Duration.between(pluginState.latestCheck, Instant.now()).toMinutes() > 10)
+        if (Duration.between(pluginState.latestCheckAt, Instant.now()).toMinutes() > OFFLINE_MODE_DURATION_MIN)
             return "Nautime work in offline mode. All your stats will be saved"
 
         val tooltip = tooltipData ?: TooltipData("Nau")
@@ -489,3 +508,5 @@ class NauPlugin() : Disposable {
         fun getPluginVersion(): String = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version ?: "0.0.0"
     }
 }
+
+fun String.maskPluginId() = this.substring(0, 8) + "**"

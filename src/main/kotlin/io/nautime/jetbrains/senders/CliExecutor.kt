@@ -4,6 +4,7 @@ import io.nautime.jetbrains.CliHolder
 import io.nautime.jetbrains.NauPlugin
 import io.nautime.jetbrains.SERVER_ADDRESS
 import io.nautime.jetbrains.ex.CliNotReadyEx
+import io.nautime.jetbrains.maskPluginId
 import io.nautime.jetbrains.model.SendEventsRequest
 import io.nautime.jetbrains.utils.OsHelper
 import kotlinx.serialization.Serializable
@@ -23,7 +24,7 @@ class CliExecutor(
     fun send(eventsRequest: SendEventsRequest, send: Boolean): Boolean {
         val json = NauPlugin.json.encodeToString(eventsRequest)
 
-        NauPlugin.log.info("[Cli] start sending events [${nauPlugin.getPluginId()}] $eventsRequest")
+        NauPlugin.log.info("[Cli] start sending events [${nauPlugin.getPluginId().maskPluginId()}] $eventsRequest")
 
         if (!CliHolder.isCliReady()) {
             nauPlugin.getState().isCliReady = false
@@ -33,10 +34,12 @@ class CliExecutor(
 
         try {
             val path = CliHolder.CLI_FILE.absolutePath
-            val cmds =
-                "$path event -a=${nauPlugin.getState().isLinked && send} -d events:${eventsRequest.events.size} -k ${nauPlugin.getPluginId()} -s $SERVER_ADDRESS/api/plugin/v1/events"
 
-            NauPlugin.log.info("Execute cli with cmds $cmds")
+            NauPlugin.log.info("Execute cli with cmds $path event " +
+                    "-a=${nauPlugin.getState().isLinked && send} " +
+                    "-d events:${eventsRequest.events.size} " +
+                    "-k ${nauPlugin.getPluginId().maskPluginId()} " +
+                    "-s $SERVER_ADDRESS/api/plugin/v1/events")
 
             val pb = ProcessBuilder(
                 path, "event",

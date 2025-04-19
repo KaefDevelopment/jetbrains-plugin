@@ -70,9 +70,18 @@
 
     <change-notes>
         <![CDATA[
+        1.2.21
+        <br />
+        Minor improves
+        <br />
+        1.2.20
+        <br />
+        Add unlink to settings
+        <br />
         1.2.18
         <br />
         Add top repositories stats to status bar tooltip
+        <br />
         1.2.14
         <br />
         Stability fixes

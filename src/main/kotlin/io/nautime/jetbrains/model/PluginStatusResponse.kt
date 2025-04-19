@@ -22,6 +22,9 @@ data class PluginStatusResponse(
         )
     }
 
+    override fun toString(): String {
+        return "PluginStatusResponse(auth=$auth, cliVersion='$cliVersion', stats=$stats, tooltip=$tooltip, notificationList=${notificationList.size})"
+    }
 }
 
 @Serializable
@@ -33,7 +36,11 @@ data class Stats(
 @Serializable
 data class TooltipData(
     val html: String,
-)
+) {
+    override fun toString(): String {
+        return "TooltipData(html='length:${html.length}')"
+    }
+}
 
 @Serializable
 data class GoalStats(

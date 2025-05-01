@@ -77,9 +77,8 @@ class CliExecutor(
 
             val stdoutStr = stdout.lines().collect(Collectors.joining())
             if (stdoutStr.isNotBlank()) {
-                NauPlugin.log.info("[Cli] Events sent out $stdoutStr")
+                NauPlugin.log.info("[Cli] Events sent. Response: $stdoutStr")
                 val response: StatusResponse = NauPlugin.json.decodeFromString(stdoutStr)
-                if (response.status) NauPlugin.log.info("[Cli] Events sent")
                 return response.status
             }
 
